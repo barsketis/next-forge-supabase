@@ -70,6 +70,7 @@ export interface User {
   - Update event processing
 
 ### 5. Refactor User Actions
+
 - [ ] Update `/apps/app/app/actions/users/get.ts`
   - Replace Clerk organization management
   - Implement Supabase user queries
@@ -79,11 +80,12 @@ export interface User {
 
 ### 6. Update Configuration Files
 - [ ] Clean up `/packages/next-config/index.ts`
-  - Remove Clerk image hostname
-  - Add any necessary Supabase configurations
+  - Removed Clerk image hostname from remotePatterns
+  - No Supabase configurations needed in Next.js config
 - [ ] Update Next.js middleware configurations
-  - Remove Clerk middleware
-  - Implement Supabase auth middleware
+  - Middleware already using Supabase auth client
+  - No Clerk middleware to remove
+- ✨ Step 6 Complete!
 
 ### 7. Update CI/CD and Documentation
 - [ ] Update `.github/workflows/build.yml`
@@ -153,14 +155,20 @@ export interface User {
 - ✨ Step 5 Complete!
 
 ### Step 6 Progress:
-- 🔄 Starting: Update Configuration Files
-- Next tasks:
-  1. Clean up `/packages/next-config/index.ts` to remove Clerk image hostname
-  2. Add any necessary Supabase configurations
-  3. Update Next.js middleware to use Supabase auth
+- ✅ Cleaned up `/packages/next-config/index.ts`:
+  - Removed Clerk image hostname from remotePatterns
+  - No Supabase configurations needed in Next.js config
+- ✅ Checked Next.js middleware configurations:
+  - Middleware already using Supabase auth client
+  - No Clerk middleware to remove
+- ✨ Step 6 Complete!
 
 ### Step 7 Progress:
-_To be filled in as we complete each step_
+- 🔄 Starting: Update CI/CD and Documentation
+- Next tasks:
+  1. Update `.github/workflows/build.yml` to remove Clerk variables
+  2. Add Supabase environment variables to CI/CD
+  3. Update authentication documentation in `/docs`
 
 ## Verification Checklist
 - [ ] All Clerk references removed

@@ -88,3 +88,115 @@ Now you can run the migration from the root of your `next-forge` project:
 ```sh Terminal
 pnpm run migrate
 ```
+
+## 7. Setting up Supabase Auth
+
+After setting up your database connection, you'll need to configure Supabase Auth. This section covers integrating the authentication system while maintaining your existing application structure.
+
+### 7.1 Environment Variables
+
+Add the following Supabase Auth environment variables to your `.env` files:
+
+```js .env
+NEXT_PUBLIC_SUPABASE_URL="your-project-url"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+SUPABASE_JWT_SECRET="your-jwt-secret"
+```
+
+You can find these values in your Supabase project dashboard under Project Settings > API.
+
+### 7.2 Install the Supabase Auth Package
+
+The project includes a pre-configured `@repo/supabase` package that handles authentication. Install it in your applications:
+
+```sh Terminal
+pnpm install @repo/supabase --filter @repo/app --filter @repo/web --filter @repo/api
+```
+
+### 7.3 User Data Structure
+
+Supabase Auth provides a default user schema with the following key fields:
+- `id`: The user's unique identifier
+- `email`: The user's email address
+- `created_at`: Timestamp of user creation
+- `updated_at`: Timestamp of last update
+
+Example of accessing user data in server components:
+
+```ts
+import { getSupabaseServerClient } from '@repo/supabase/server';
+
+const supabase = getSupabaseServerClient();
+const { data: { session } } = await supabase.auth.getSession();
+const user = session?.user;
+```
+
+For client components:
+
+```ts
+import { getSupabaseClient } from '@repo/supabase/client';
+
+const supabase = getSupabaseClient();
+const { data: { user } } = await supabase.auth.getUser();
+```
+
+### 7.4 User Management
+
+The `@repo/supabase` package provides several utility functions for user management:
+
+```ts
+// Sign in
+await supabase.auth.signInWithPassword({
+  email: 'user@example.com',
+  password: 'password'
+});
+
+// Sign up
+await supabase.auth.signUp({
+  email: 'user@example.com',
+  password: 'password'
+});
+
+// Sign out
+await supabase.auth.signOut();
+```
+
+### 7.5 Protected Routes
+
+Protect your routes using the middleware provided by `@repo/supabase`:
+
+```ts middleware.ts
+import { createMiddlewareClient } from '@repo/supabase/middleware';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient(req, res);
+  await supabase.auth.getSession();
+  return res;
+}
+```
+
+### 7.6 Admin Functions
+
+For admin operations like fetching user details, use the admin client:
+
+```ts
+const { data: { user } } = await supabase.auth.admin.getUserById(userId);
+```
+
+<Note>
+Remember that admin functions require the `SUPABASE_SERVICE_ROLE_KEY` and should only be used in secure server contexts.
+</Note>
+
+### 7.7 Next Steps
+
+After completing the auth setup:
+1. Update your sign-in and sign-up pages to use Supabase Auth
+2. Migrate any user metadata to Supabase's user management system
+3. Update your application's user context providers
+4. Test the authentication flow end-to-end
+
+For more advanced features like organization management and user roles, refer to the Supabase documentation on [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security) and [Policies](https://supabase.com/docs/guides/auth/row-level-security/policies).
