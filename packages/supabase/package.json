@@ -16,11 +16,8 @@
     "./server-admin-client": "./clients/server-admin-client.ts",
     "./middleware-client": "./clients/middleware-client.ts",
     "./browser-client": "./clients/browser-client.ts",
-    "./check-requires-mfa": "./check-requires-mfa.ts",
     "./require-user": "./require-user.ts",
-    "./hooks/*": "./hooks/*.ts",
-    "./database": "./database.types.ts",
-    "./auth": "./auth.ts"
+    "./database": "./database.types.ts"
   },
   "dependencies": {
     "@repo/tailwind-config": "workspace:*",

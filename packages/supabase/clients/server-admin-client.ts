@@ -1,8 +1,9 @@
 import 'server-only';
 
+import { log } from '@repo/observability/log';
 import { createClient } from '@supabase/supabase-js';
 
-import { Database } from '../database.types';
+import type { Database } from '../database.types';
 import { keys } from '../keys';
 
 /**
@@ -11,9 +12,7 @@ import { keys } from '../keys';
  */
 export function getSupabaseServerAdminClient<GenericSchema = Database>() {
   if (process.env.NODE_ENV !== 'production') {
-    console.warn(
-      `[Dev Only] This is a simple warning to let you know you are using the Supabase Service Role. Make sure it's the right call.`
-    );
+    log.warn('Using Supabase Service Role - ensure this is intentional');
   }
 
   const env = keys();

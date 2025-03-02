@@ -1,10 +1,10 @@
 import 'server-only';
 
-import { type NextRequest, NextResponse } from 'next/server';
+import type { NextRequest, NextResponse } from 'next/server';
 
 import { createServerClient } from '@supabase/ssr';
 
-import { Database } from '../database.types';
+import type { Database } from '../database.types';
 import { keys } from '../keys';
 
 /**
@@ -15,7 +15,7 @@ import { keys } from '../keys';
  */
 export function createMiddlewareClient<GenericSchema = Database>(
   request: NextRequest,
-  response: NextResponse,
+  response: NextResponse
 ) {
   const env = keys();
 
@@ -28,13 +28,13 @@ export function createMiddlewareClient<GenericSchema = Database>(
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
+          for (const { name, value } of cookiesToSet) {
+            request.cookies.set(name, value);
+          }
 
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
+          for (const { name, value, options } of cookiesToSet) {
+            response.cookies.set(name, value, options);
+          }
         },
       },
     }

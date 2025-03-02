@@ -4,39 +4,42 @@ import { Button } from '@repo/design-system/components/ui/button';
 import { Input } from '@repo/design-system/components/ui/input';
 import { useToast } from '@repo/design-system/components/ui/use-toast';
 import { parseError } from '@repo/observability/error';
-import { useRouter } from 'next/navigation';
-import { useSignInWithEmailPassword } from '../hooks/use-sign-in-with-email-password';
+import { useFormStatus } from 'react-dom';
+import { signInWithPassword } from '../actions/auth';
 
-export function SignIn() {
-  const { mutate: signIn, isLoading } = useSignInWithEmailPassword();
-  const { toast } = useToast();
-  const router = useRouter();
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    try {
-      await signIn({ email, password });
-      router.push('/');
-      toast({
-        title: 'Success',
-        description: 'You have been signed in.',
-      });
-    } catch (error) {
-      const message = parseError(error);
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
-    }
-  };
+function SignInButton() {
+  const { pending } = useFormStatus();
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4">
+    <Button type="submit" disabled={pending}>
+      {pending ? 'Signing in...' : 'Sign in'}
+    </Button>
+  );
+}
+
+export function SignIn() {
+  const { toast } = useToast();
+
+  function handleError(error: unknown) {
+    const message = parseError(error);
+    toast({
+      title: 'Error',
+      description: message,
+      variant: 'destructive',
+    });
+  }
+
+  return (
+    <form
+      action={async (formData) => {
+        try {
+          await signInWithPassword(formData);
+        } catch (error) {
+          handleError(error);
+        }
+      }}
+      className="grid gap-4"
+    >
       <div className="grid gap-2">
         <Input
           id="email"
@@ -57,9 +60,7 @@ export function SignIn() {
           required
         />
       </div>
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? 'Signing in...' : 'Sign in'}
-      </Button>
+      <SignInButton />
     </form>
   );
 }

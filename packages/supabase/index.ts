@@ -1,27 +1,20 @@
-// Server-only exports
-export * from './server';
-
-// Client-side exports
-export * from './client';
-
-// Keys
-export * from './keys';
-
-// Database types
-export type { Database } from './database.types';
-
-// Auth
-export * from './auth';
-
 // Server Actions
 export * from './actions/auth';
 export * from './actions/user';
-
-// Components
-export * from './components/auth/login-form';
 
 // Server Utilities
 export * from './server';
 
 // Client Utilities
 export * from './client';
+
+// Components
+export * from './components/sign-in';
+export * from './components/sign-up';
+export * from './components/sign-out';
+
+// Types
+export * from './database.types';
+
+// Keys
+export * from './keys';
