@@ -47,7 +47,7 @@ jobs:
         run: |
           touch apps/app/.env.local
 
-          echo "SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test" >> apps/app/.env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=KEY.test" >> apps/app/.env.local
           echo "SUPABASE_JWT_SECRET=your-super-secret-jwt-token-with-at-least-32-characters-long" >> apps/app/.env.local
           echo "RESEND_FROM=test@test.com" >> apps/app/.env.local
           echo "DATABASE_URL=postgresql://test:test@localhost:5432/test" >> apps/app/.env.local
@@ -56,7 +56,7 @@ jobs:
           echo "STRIPE_WEBHOOK_SECRET=whsec_test" >> apps/app/.env.local
           echo "BETTERSTACK_API_KEY=test" >> apps/app/.env.local
           echo "BETTERSTACK_URL=https://test.com" >> apps/app/.env.local
-          echo "FLAGS_SECRET=FcnUGt7tT-4cOw-D_1GoXAH1bU7ljDBr01F5w4dxrdQ" >> apps/app/.env.local
+          echo "FLAGS_SECRET=FLAGKEY" >> apps/app/.env.local
           echo "ARCJET_KEY=ajkey_test" >> apps/app/.env.local
           echo "SVIX_TOKEN=testsk_test" >> apps/app/.env.local
           echo "LIVEBLOCKS_SECRET=sk_test" >> apps/app/.env.local
@@ -66,7 +66,7 @@ jobs:
           echo "KNOCK_FEED_CHANNEL_ID=test" >> apps/app/.env.local
 
           echo "NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321" >> apps/app/.env.local
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test" >> apps/app/.env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=ANON_KEY.test" >> apps/app/.env.local
           echo "NEXT_PUBLIC_GA_MEASUREMENT_ID=G-test" >> apps/app/.env.local
           echo "NEXT_PUBLIC_POSTHOG_KEY=phc_test" >> apps/app/.env.local
           echo "NEXT_PUBLIC_POSTHOG_HOST=https://test.com" >> apps/app/.env.local
