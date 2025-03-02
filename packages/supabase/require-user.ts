@@ -58,12 +58,12 @@ export async function requireUser(client: SupabaseClient): Promise<
 
 class AuthenticationError extends Error {
   constructor() {
-    super(`Authentication required`);
+    super('Authentication required');
   }
 }
 
 class MultiFactorAuthError extends Error {
   constructor() {
-    super(`Multi-factor authentication required`);
+    super('Multi-factor authentication required');
   }
 }

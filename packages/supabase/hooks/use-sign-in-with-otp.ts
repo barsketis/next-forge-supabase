@@ -1,7 +1,6 @@
 import type { SignInWithPasswordlessCredentials } from '@supabase/supabase-js';
 
-import { useMutation } from '@tanstack/react-query';
-
+import { log } from '@repo/observability/log';
 import { useSupabase } from './use-supabase';
 
 /**
@@ -10,16 +9,17 @@ import { useSupabase } from './use-supabase';
  */
 export function useSignInWithOtp() {
   const client = useSupabase();
-  const mutationKey = ['auth', 'sign-in-with-otp'];
 
-  const mutationFn = async (credentials: SignInWithPasswordlessCredentials) => {
+  const signInWithOtp = async (
+    credentials: SignInWithPasswordlessCredentials
+  ) => {
     const result = await client.auth.signInWithOtp(credentials);
 
     if (result.error) {
       if (shouldIgnoreError(result.error.message)) {
-        console.warn(
-          `Ignoring error during development: ${result.error.message}`,
-        );
+        log.warn('Ignoring OTP error during development', {
+          error: result.error.message,
+        });
 
         return {} as never;
       }
@@ -30,10 +30,7 @@ export function useSignInWithOtp() {
     return result.data;
   };
 
-  return useMutation({
-    mutationFn,
-    mutationKey,
-  });
+  return { signInWithOtp };
 }
 
 function shouldIgnoreError(error: string) {
@@ -41,5 +38,5 @@ function shouldIgnoreError(error: string) {
 }
 
 function isSmsProviderNotSetupError(error: string) {
-  return error.includes(`sms Provider could not be found`);
+  return error.includes('sms Provider could not be found');
 }

@@ -1,7 +1,5 @@
 import type { VerifyOtpParams } from '@supabase/supabase-js';
 
-import { useMutation } from '@tanstack/react-query';
-
 import { useSupabase } from './use-supabase';
 
 /**
@@ -11,9 +9,7 @@ import { useSupabase } from './use-supabase';
 export function useVerifyOtp() {
   const client = useSupabase();
 
-  const mutationKey = ['verify-otp'];
-
-  const mutationFn = async (params: VerifyOtpParams) => {
+  const verifyOtp = async (params: VerifyOtpParams) => {
     const { data, error } = await client.auth.verifyOtp(params);
 
     if (error) {
@@ -23,8 +19,5 @@ export function useVerifyOtp() {
     return data;
   };
 
-  return useMutation({
-    mutationFn,
-    mutationKey,
-  });
+  return { verifyOtp };
 }

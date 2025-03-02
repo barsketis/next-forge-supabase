@@ -1,9 +1,9 @@
 import { env } from '@/env';
-import { getSupabaseServerClient } from '@repo/supabase/server';
 import { SidebarProvider } from '@repo/design-system/components/ui/sidebar';
 import { showBetaFeature } from '@repo/feature-flags';
 import { NotificationsProvider } from '@repo/notifications/components/provider';
 import { secure } from '@repo/security';
+import { getSupabaseServerClient } from '@repo/supabase/server';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { PostHogIdentifier } from './components/posthog-identifier';
@@ -19,11 +19,13 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
   }
 
   const supabase = getSupabaseServerClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const betaFeature = await showBetaFeature();
 
   if (!session) {
-    redirect('/sign-in');
+    redirect('/login');
   }
 
   return (
