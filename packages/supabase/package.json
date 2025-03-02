@@ -1,0 +1,50 @@
+{
+  "name": "@repo/supabase",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./client": "./client.ts",
+    "./middleware": "./middleware.ts",
+    "./server": "./server.ts",
+    "./keys": "./keys.ts",
+    "./server-client": "./clients/server-client.ts",
+    "./server-admin-client": "./clients/server-admin-client.ts",
+    "./middleware-client": "./clients/middleware-client.ts",
+    "./browser-client": "./clients/browser-client.ts",
+    "./check-requires-mfa": "./check-requires-mfa.ts",
+    "./require-user": "./require-user.ts",
+    "./hooks/*": "./hooks/*.ts",
+    "./database": "./database.types.ts",
+    "./auth": "./auth.ts"
+  },
+  "dependencies": {
+    "@repo/tailwind-config": "workspace:*",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "2.48.1",
+    "@t3-oss/env-nextjs": "^0.12.0",
+    "@tanstack/react-query": "5.64.1",
+    "next": "15.1.7",
+    "react": "^19.0.0",
+    "server-only": "^0.0.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "22.13.4", 
+    "@types/react": "19.0.9",
+    "@types/react-dom": "^19.0.3",
+    "typescript": "^5.7.3"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "*"
+      ]
+    }
+  }
+}
