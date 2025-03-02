@@ -28,10 +28,8 @@ const AUTH_PATHS = ['/auth'];
  */
 export function useAuthChangeListener({
   privatePathPrefixes = PRIVATE_PATH_PREFIXES,
-  appHomePath,
   onEvent,
 }: {
-  appHomePath: string;
   privatePathPrefixes?: string[];
   onEvent?: (event: AuthChangeEvent, user: Session | null) => void;
 }) {
@@ -71,7 +69,7 @@ export function useAuthChangeListener({
 
     // destroy listener on un-mounts
     return () => listener.data.subscription.unsubscribe();
-  }, [client.auth, pathName, appHomePath, privatePathPrefixes, onEvent]);
+  }, [client.auth, pathName, privatePathPrefixes, onEvent]);
 }
 
 /**

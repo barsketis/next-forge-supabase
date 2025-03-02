@@ -26,4 +26,4 @@ export * from './hooks/use-fetch-mfa-factors';
 export * from './hooks/use-request-reset-password';
 export * from './hooks/use-update-user-mutation';
 export * from './hooks/use-user-factors-mutation-key';
-export * from './hooks/use-verify-otp'; 
+export * from './hooks/use-verify-otp';

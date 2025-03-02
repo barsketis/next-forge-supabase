@@ -1,5 +1,5 @@
-import { auth } from '@repo/auth/server';
 import { database } from '@repo/database';
+import { getSupabaseServerClient } from '@repo/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import { Header } from '../components/header';
 
@@ -29,7 +29,11 @@ const SearchPage = async ({ searchParams }: SearchPageProperties) => {
       },
     },
   });
-  const { orgId } = await auth();
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const orgId = session?.user?.id; // Using user ID as org ID for now
 
   if (!orgId) {
     notFound();

@@ -38,6 +38,22 @@ export interface User {
   factors?: Factor[]
 }
   ```
+- [ ] Update remaining files with @repo/auth references:
+  - `/packages/design-system/index.tsx`: Replace AuthProvider from @repo/auth with SupabaseProvider
+  - `/packages/feature-flags/lib/create-flag.ts`: Update auth import
+  - `/packages/webhooks/lib/svix.ts`: Update auth import
+  - `/apps/app/app/(authenticated)/page.tsx`: Update auth import
+  - `/apps/app/app/api/collaboration/auth/route.ts`: Update auth and currentUser imports
+  - `/apps/app/app/(unauthenticated)/sign-up/[[...sign-up]]/page.tsx`: Update SignUp component import
+  - `/apps/app/app/(authenticated)/search/page.tsx`: Update auth import
+  - `/apps/app/app/(unauthenticated)/sign-in/[[...sign-in]]/page.tsx`: Update SignIn component import
+- [ ] Update documentation files:
+  - `/docs/packages/ai.mdx`
+  - `/docs/packages/authentication.mdx`
+  - `/docs/packages/security/rate-limiting.mdx`
+  - `/docs/recipes/ai-chatbot.mdx`
+  - `/docs/migrations/storage/upload-thing.mdx`
+  - `/docs/migrations/flags/hypertune.mdx`
 
 ### 2. Update Environment Variables
 - [x] Remove Clerk variables from all `.env.example` files:

@@ -1,5 +1,5 @@
-import { auth, currentUser } from '@repo/auth/server';
 import { authenticate } from '@repo/collaboration/auth';
+import { getSupabaseServerClient } from '@repo/supabase/server';
 import { tailwind } from '@repo/tailwind-config';
 
 const COLORS = [
@@ -23,8 +23,12 @@ const COLORS = [
 ];
 
 export const POST = async () => {
-  const user = await currentUser();
-  const { orgId } = await auth();
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
+  const orgId = user?.id; // Using user ID as org ID for now
 
   if (!user || !orgId) {
     return new Response('Unauthorized', { status: 401 });
@@ -34,9 +38,8 @@ export const POST = async () => {
     userId: user.id,
     orgId,
     userInfo: {
-      name:
-        user.fullName ?? user.emailAddresses.at(0)?.emailAddress ?? undefined,
-      avatar: user.imageUrl ?? undefined,
+      name: user.email ?? undefined,
+      avatar: undefined, // No avatar in Supabase by default
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
     },
   });

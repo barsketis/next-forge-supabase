@@ -1,10 +1,6 @@
 import type { User } from '@supabase/supabase-js';
-
-import { useQuery } from '@tanstack/react-query';
-
+import { useCallback, useEffect, useState } from 'react';
 import { useSupabase } from './use-supabase';
-
-const queryKey = ['supabase:user'];
 
 /**
  * @name useUser
@@ -13,28 +9,38 @@ const queryKey = ['supabase:user'];
  */
 export function useUser(initialData?: User | null) {
   const client = useSupabase();
+  const [user, setUser] = useState<User | null | undefined>(initialData);
+  const [isLoading, setIsLoading] = useState(!initialData);
+  const [error, setError] = useState<Error | null>(null);
 
-  const queryFn = async () => {
-    const response = await client.auth.getUser();
+  const fetchUser = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await client.auth.getUser();
 
-    // this is most likely a session error or the user is not logged in
-    if (response.error) {
-      return undefined;
+      if (response.error) {
+        setUser(undefined);
+        return;
+      }
+
+      if (response.data?.user) {
+        setUser(response.data.user);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e : new Error('Failed to fetch user'));
+    } finally {
+      setIsLoading(false);
     }
+  }, [client.auth]);
 
-    if (response.data?.user) {
-      return response.data.user;
-    }
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
-    return Promise.reject(new Error('Unexpected result format'));
+  return {
+    data: user,
+    isLoading,
+    error,
+    refetch: fetchUser,
   };
-
-  return useQuery({
-    queryFn,
-    queryKey,
-    initialData,
-    refetchInterval: false,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-  });
 }

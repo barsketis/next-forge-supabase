@@ -1,13 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
-
+import { useState } from 'react';
+import { type SignUpSchema, signUpSchema } from '../schemas';
 import { useSupabase } from './use-supabase';
-
-interface Credentials {
-  email: string;
-  password: string;
-  emailRedirectTo: string;
-  captchaToken?: string;
-}
 
 /**
  * @name useSignUpWithEmailAndPassword
@@ -15,36 +8,43 @@ interface Credentials {
  */
 export function useSignUpWithEmailAndPassword() {
   const client = useSupabase();
-  const mutationKey = ['auth', 'sign-up-with-email-password'];
+  const [isPending, setIsPending] = useState(false);
 
-  const mutationFn = async (params: Credentials) => {
-    const { emailRedirectTo, captchaToken, ...credentials } = params;
+  const signUp = async (params: SignUpSchema) => {
+    try {
+      setIsPending(true);
+      // Validate all inputs with Zod
+      const validated = signUpSchema.parse(params);
+      const { emailRedirectTo, captchaToken, ...credentials } = validated;
 
-    const response = await client.auth.signUp({
-      ...credentials,
-      options: {
-        emailRedirectTo,
-        captchaToken,
-      },
-    });
+      const response = await client.auth.signUp({
+        ...credentials,
+        options: {
+          emailRedirectTo,
+          captchaToken,
+        },
+      });
 
-    if (response.error) {
-      throw response.error.message;
+      if (response.error) {
+        throw response.error.message;
+      }
+
+      const user = response.data?.user;
+      const identities = user?.identities ?? [];
+
+      // if the user has no identities, it means that the email is taken
+      if (identities.length === 0) {
+        throw new Error('User already registered');
+      }
+
+      return response.data;
+    } finally {
+      setIsPending(false);
     }
-
-    const user = response.data?.user;
-    const identities = user?.identities ?? [];
-
-    // if the user has no identities, it means that the email is taken
-    if (identities.length === 0) {
-      throw new Error('User already registered');
-    }
-
-    return response.data;
   };
 
-  return useMutation({
-    mutationKey,
-    mutationFn,
-  });
+  return {
+    signUp,
+    isPending,
+  };
 }

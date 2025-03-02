@@ -1,6 +1,6 @@
 import { env } from '@/env';
-import { auth } from '@repo/auth/server';
 import { database } from '@repo/database';
+import { getSupabaseServerClient } from '@repo/supabase/server';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
@@ -24,7 +24,11 @@ export const metadata: Metadata = {
 
 const App = async () => {
   const pages = await database.page.findMany();
-  const { orgId } = await auth();
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const orgId = session?.user?.id; // Using user ID as org ID for now
 
   if (!orgId) {
     notFound();

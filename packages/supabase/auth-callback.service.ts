@@ -1,8 +1,10 @@
 import 'server-only';
 
-import {
+import { parseError } from '@repo/observability/error';
+import { log } from '@repo/observability/log';
+import type {
   AuthError,
-  type EmailOtpType,
+  EmailOtpType,
   SupabaseClient,
 } from '@supabase/supabase-js';
 
@@ -37,7 +39,7 @@ class AuthCallbackService {
     params: {
       redirectPath: string;
       errorPath?: string;
-    },
+    }
   ): Promise<URL> {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
@@ -99,6 +101,12 @@ class AuthCallbackService {
         url.searchParams.set('code', error.code);
       }
 
+      log.error('Failed to verify OTP', {
+        error: error.message,
+        code: error.code,
+        name: 'auth.callback.verifyOtp',
+      });
+
       const errorMessage = getAuthErrorMessage({
         error: error.message,
         code: error.code,
@@ -124,7 +132,7 @@ class AuthCallbackService {
     params: {
       redirectPath: string;
       errorPath?: string;
-    },
+    }
   ): Promise<{
     nextPath: string;
   }> {
@@ -145,6 +153,12 @@ class AuthCallbackService {
 
         // if we have an error, we redirect to the error page
         if (error) {
+          log.error('Failed to exchange code for session', {
+            error: error.message,
+            code: error.code,
+            name: 'auth.callback.exchangeCodeForSession',
+          });
+
           return onError({
             code: error.code,
             error: error.message,
@@ -152,25 +166,26 @@ class AuthCallbackService {
           });
         }
       } catch (error) {
-        console.error(
-          {
-            error,
-            name: `auth.callback`,
-          },
-          `An error occurred while exchanging code for session`,
-        );
-
-        const message = error instanceof Error ? error.message : error;
+        const parsedError = parseError(error);
+        log.error('An error occurred while exchanging code for session', {
+          error: parsedError,
+          name: 'auth.callback.exchangeCodeForSession',
+        });
 
         return onError({
           code: (error as AuthError)?.code,
-          error: message as string,
+          error: parsedError,
           path: errorPath,
         });
       }
     }
 
     if (error) {
+      log.error('Error in auth callback', {
+        error,
+        name: 'auth.callback',
+      });
+
       return onError({
         error,
         path: errorPath,
@@ -194,13 +209,11 @@ function onError({
 }) {
   const errorMessage = getAuthErrorMessage({ error, code });
 
-  console.error(
-    {
-      error,
-      name: `auth.callback`,
-    },
-    `An error occurred while signing user in`,
-  );
+  log.error('An error occurred while signing user in', {
+    error,
+    code,
+    name: 'auth.callback',
+  });
 
   const searchParams = new URLSearchParams({
     error: errorMessage,
@@ -232,10 +245,8 @@ function isVerifierError(error: string) {
  */
 function getAuthErrorMessage(params: { error: string; code?: string }) {
   // this error arises when the user tries to sign in with an expired email link
-  if (params.code) {
-    if (params.code === 'otp_expired') {
-      return 'auth:errors.otp_expired';
-    }
+  if (params.code && params.code === 'otp_expired') {
+    return 'auth:errors.otp_expired';
   }
 
   // this error arises when the user is trying to sign in with a different
@@ -245,5 +256,5 @@ function getAuthErrorMessage(params: { error: string; code?: string }) {
   }
 
   // fallback to the default error message
-  return `auth:authenticationErrorAlertBody`;
+  return 'auth:authenticationErrorAlertBody';
 }

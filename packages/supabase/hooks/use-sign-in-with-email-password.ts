@@ -1,8 +1,13 @@
-import type { SignInWithPasswordCredentials } from '@supabase/supabase-js';
-
-import { useMutation } from '@tanstack/react-query';
-
+import type { AuthResponse } from '@supabase/supabase-js';
+import { useCallback, useState } from 'react';
+import { type SignInSchema, signInSchema } from '../schemas';
 import { useSupabase } from './use-supabase';
+
+interface SignInState {
+  isLoading: boolean;
+  error: string | null;
+  data: AuthResponse['data'] | null;
+}
 
 /**
  * @name useSignInWithEmailPassword
@@ -10,25 +15,56 @@ import { useSupabase } from './use-supabase';
  */
 export function useSignInWithEmailPassword() {
   const client = useSupabase();
-  const mutationKey = ['auth', 'sign-in-with-email-password'];
+  const [state, setState] = useState<SignInState>({
+    isLoading: false,
+    error: null,
+    data: null,
+  });
 
-  const mutationFn = async (credentials: SignInWithPasswordCredentials) => {
-    const response = await client.auth.signInWithPassword(credentials);
+  const mutate = useCallback(
+    async (credentials: SignInSchema) => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-    if (response.error) {
-      throw response.error.message;
-    }
+        // Validate credentials with Zod
+        const validated = signInSchema.parse(credentials);
 
-    const user = response.data?.user;
-    const identities = user?.identities ?? [];
+        const response = await client.auth.signInWithPassword(validated);
 
-    // if the user has no identities, it means that the email is taken
-    if (identities.length === 0) {
-      throw new Error('User already registered');
-    }
+        if (response.error) {
+          throw response.error.message;
+        }
 
-    return response.data;
+        const user = response.data?.user;
+        const identities = user?.identities ?? [];
+
+        // if the user has no identities, it means that the email is taken
+        if (identities.length === 0) {
+          throw new Error('User already registered');
+        }
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          data: response.data,
+        }));
+        return response.data;
+      } catch (error) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: error instanceof Error ? error.message : 'An error occurred',
+        }));
+        throw error;
+      }
+    },
+    [client]
+  );
+
+  return {
+    mutate,
+    isLoading: state.isLoading,
+    error: state.error,
+    data: state.data,
   };
-
-  return useMutation({ mutationKey, mutationFn });
 }

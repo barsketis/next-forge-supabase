@@ -1,5 +1,5 @@
 import 'server-only';
-import { auth } from '@repo/auth/server';
+import { getSupabaseServerClient } from '@repo/supabase/server';
 import { Svix } from 'svix';
 import { keys } from '../keys';
 
@@ -11,7 +11,11 @@ export const send = async (eventType: string, payload: object) => {
   }
 
   const svix = new Svix(svixToken);
-  const { orgId } = await auth();
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const orgId = session?.user?.id; // Using user ID as org ID for now
 
   if (!orgId) {
     return;
@@ -36,7 +40,11 @@ export const getAppPortal = async () => {
   }
 
   const svix = new Svix(svixToken);
-  const { orgId } = await auth();
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const orgId = session?.user?.id; // Using user ID as org ID for now
 
   if (!orgId) {
     return;
