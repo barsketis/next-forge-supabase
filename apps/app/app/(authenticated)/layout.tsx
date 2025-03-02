@@ -1,9 +1,10 @@
 import { env } from '@/env';
-import { auth, currentUser } from '@repo/auth/server';
+import { getSupabaseServerClient } from '@repo/supabase/server';
 import { SidebarProvider } from '@repo/design-system/components/ui/sidebar';
 import { showBetaFeature } from '@repo/feature-flags';
 import { NotificationsProvider } from '@repo/notifications/components/provider';
 import { secure } from '@repo/security';
+import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { PostHogIdentifier } from './components/posthog-identifier';
 import { GlobalSidebar } from './components/sidebar';
@@ -17,16 +18,16 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
     await secure(['CATEGORY:PREVIEW']);
   }
 
-  const user = await currentUser();
-  const { redirectToSignIn } = await auth();
+  const supabase = getSupabaseServerClient();
+  const { data: { session } } = await supabase.auth.getSession();
   const betaFeature = await showBetaFeature();
 
-  if (!user) {
-    return redirectToSignIn();
+  if (!session) {
+    redirect('/sign-in');
   }
 
   return (
-    <NotificationsProvider userId={user.id}>
+    <NotificationsProvider userId={session.user.id}>
       <SidebarProvider>
         <GlobalSidebar>
           {betaFeature && (

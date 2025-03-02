@@ -1,23 +1,8 @@
 'use server';
 
-import {
-  type OrganizationMembership,
-  auth,
-  clerkClient,
-} from '@repo/auth/server';
+import { getSupabaseServerClient } from '@repo/supabase/server';
+import type { User } from '@supabase/supabase-js';
 import { tailwind } from '@repo/tailwind-config';
-
-const getName = (user: OrganizationMembership): string | undefined => {
-  let name = user.publicUserData?.firstName;
-
-  if (name && user.publicUserData?.lastName) {
-    name = `${name} ${user.publicUserData.lastName}`;
-  } else if (!name) {
-    name = user.publicUserData?.identifier;
-  }
-
-  return name;
-};
 
 const colors = [
   tailwind.theme.colors.red[500],
@@ -50,30 +35,27 @@ export const getUsers = async (
     }
 > => {
   try {
-    const { orgId } = await auth();
+    const supabase = getSupabaseServerClient();
+    const { data: session } = await supabase.auth.getSession();
 
-    if (!orgId) {
+    if (!session.session?.user) {
       throw new Error('Not logged in');
     }
 
-    const clerk = await clerkClient();
+    // Get all users from the requested IDs
+    const users: User[] = [];
+    for (const id of userIds) {
+      const { data: { user } } = await supabase.auth.admin.getUserById(id);
+      if (user) {
+        users.push(user);
+      }
+    }
 
-    const members = await clerk.organizations.getOrganizationMembershipList({
-      organizationId: orgId,
-      limit: 100,
-    });
-
-    const data: Liveblocks['UserMeta']['info'][] = members.data
-      .filter(
-        (user) =>
-          user.publicUserData?.userId &&
-          userIds.includes(user.publicUserData.userId)
-      )
-      .map((user) => ({
-        name: getName(user) ?? 'Unknown user',
-        picture: user.publicUserData?.imageUrl ?? '',
-        color: colors[Math.floor(Math.random() * colors.length)],
-      }));
+    const data = users.map((user) => ({
+      name: user.email ?? 'Unknown user',
+      picture: '', // No avatar URL in Supabase by default
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }));
 
     return { data };
   } catch (error) {

@@ -1,6 +1,5 @@
 'use client';
 
-import { OrganizationSwitcher, UserButton } from '@repo/auth/client';
 import { ModeToggle } from '@repo/design-system/components/mode-toggle';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
@@ -35,6 +34,13 @@ import {
 } from '@repo/design-system/components/ui/sidebar';
 import { cn } from '@repo/design-system/lib/utils';
 import { NotificationsTrigger } from '@repo/notifications/components/trigger';
+import { useUser } from '@repo/supabase/hooks/use-user';
+import { useSupabase } from '@repo/supabase/hooks/use-supabase';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@repo/design-system/components/ui/avatar';
 import {
   AnchorIcon,
   BookOpenIcon,
@@ -43,6 +49,7 @@ import {
   FolderIcon,
   FrameIcon,
   LifeBuoyIcon,
+  LogOutIcon,
   MapIcon,
   MoreHorizontalIcon,
   PieChartIcon,
@@ -51,8 +58,10 @@ import {
   ShareIcon,
   SquareTerminalIcon,
   Trash2Icon,
+  UserIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Search } from './search';
 
@@ -191,6 +200,16 @@ const data = {
 
 export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
   const sidebar = useSidebar();
+  const { data: user } = useUser();
+  const supabase = useSupabase();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/sign-in');
+  };
+
+  const userEmail = user?.email || '';
 
   return (
     <>
@@ -204,10 +223,30 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                   sidebar.open ? '' : '-mx-1'
                 )}
               >
-                <OrganizationSwitcher
-                  hidePersonal
-                  afterSelectOrganizationUrl="/"
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-start gap-2">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted">
+                        <UserIcon className="h-4 w-4" />
+                      </div>
+                      {sidebar.open && (
+                        <span className="truncate">
+                          {userEmail}
+                        </span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-[200px]">
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/profile">Profile Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOutIcon className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -326,16 +365,6 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <UserButton
-                showName
-                appearance={{
-                  elements: {
-                    rootBox: 'flex overflow-hidden w-full',
-                    userButtonBox: 'flex-row-reverse',
-                    userButtonOuterIdentifier: 'truncate pl-0',
-                  },
-                }}
-              />
               <div className="flex shrink-0 items-center gap-px">
                 <ModeToggle />
                 <Button

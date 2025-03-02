@@ -1,23 +1,8 @@
 'use server';
 
-import {
-  type OrganizationMembership,
-  auth,
-  clerkClient,
-} from '@repo/auth/server';
+import { getSupabaseServerClient } from '@repo/supabase/server';
+import type { User } from '@supabase/supabase-js';
 import Fuse from 'fuse.js';
-
-const getName = (user: OrganizationMembership): string | undefined => {
-  let name = user.publicUserData?.firstName;
-
-  if (name && user.publicUserData?.lastName) {
-    name = `${name} ${user.publicUserData.lastName}`;
-  } else if (!name) {
-    name = user.publicUserData?.identifier;
-  }
-
-  return name;
-};
 
 export const searchUsers = async (
   query: string
@@ -30,27 +15,22 @@ export const searchUsers = async (
     }
 > => {
   try {
-    const { orgId } = await auth();
+    const supabase = getSupabaseServerClient();
+    const { data: session } = await supabase.auth.getSession();
 
-    if (!orgId) {
+    if (!session.session?.user) {
       throw new Error('Not logged in');
     }
 
-    const clerk = await clerkClient();
+    // Get all users in the organization
+    const { data: { users }, error } = await supabase.auth.admin.listUsers();
+    
+    if (error) {
+      throw error;
+    }
 
-    const members = await clerk.organizations.getOrganizationMembershipList({
-      organizationId: orgId,
-      limit: 100,
-    });
-
-    const users = members.data.map((user) => ({
-      id: user.id,
-      name: getName(user) ?? user.publicUserData?.identifier,
-      imageUrl: user.publicUserData?.imageUrl,
-    }));
-
-    const fuse = new Fuse(users, {
-      keys: ['name'],
+    const fuse = new Fuse(users ?? [], {
+      keys: ['email'],
       minMatchCharLength: 1,
       threshold: 0.3,
     });

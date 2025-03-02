@@ -1,0 +1,178 @@
+# Clerk to Supabase Auth Migration
+
+## Overview
+This document outlines the step-by-step process of migrating authentication from Clerk to Supabase in the Next Forge project. Each step should be completed sequentially to ensure a smooth transition.
+
+## Migration Steps
+
+### 1. Remove Auth Package
+- [x] Delete `/packages/auth` directory entirely
+- [x] Update any imports referencing `@repo/auth` to use `@repo/supabase`
+- [x] Remove auth package from workspace dependencies
+- [x] Update tsconfig references if necessary
+- [x] Fix user schema usage in components to match Supabase User type:
+  ```typescript
+export interface User {
+  id: string
+  app_metadata: UserAppMetadata
+  user_metadata: UserMetadata
+  aud: string
+  confirmation_sent_at?: string
+  recovery_sent_at?: string
+  email_change_sent_at?: string
+  new_email?: string
+  new_phone?: string
+  invited_at?: string
+  action_link?: string
+  email?: string
+  phone?: string
+  created_at: string
+  confirmed_at?: string
+  email_confirmed_at?: string
+  phone_confirmed_at?: string
+  last_sign_in_at?: string
+  role?: string
+  updated_at?: string
+  identities?: UserIdentity[]
+  is_anonymous?: boolean
+  factors?: Factor[]
+}
+  ```
+
+### 2. Update Environment Variables
+- [x] Remove Clerk variables from all `.env.example` files:
+  - `/apps/web/.env.example`
+  - `/apps/app/.env.example`
+  - `/apps/api/.env.example`
+- [ ] Remove corresponding variables from actual `.env` files
+- [x] Verify all necessary Supabase environment variables are present:
+  - Added `SUPABASE_SERVICE_ROLE_KEY`
+  - Added `SUPABASE_JWT_SECRET`
+  - Added `NEXT_PUBLIC_SUPABASE_URL`
+  - Added `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- [x] Update environment variable validation in any `env.ts` files
+
+### 3. Update Package Dependencies
+- [ ] Remove from root `package.json`:
+  - `@clerk/nextjs`
+  - `@clerk/themes`
+  - `@clerk/types`
+- [ ] Run `pnpm install` to update lockfile
+- [ ] Verify no remaining Clerk dependencies
+
+### 4. Update API Routes
+- [ ] Refactor `/apps/api/app/webhooks/stripe/route.ts`
+  - Replace clerkClient with Supabase client
+  - Update user management logic
+- [ ] Replace `/apps/api/app/webhooks/clerk/route.ts`
+  - Create new Supabase auth webhook handler if needed
+  - Update webhook secret handling
+  - Update event processing
+
+### 5. Refactor User Actions
+- [ ] Update `/apps/app/app/actions/users/get.ts`
+  - Replace Clerk organization management
+  - Implement Supabase user queries
+- [ ] Update `/apps/app/app/actions/users/search.ts`
+  - Replace Clerk user search
+  - Implement Supabase user search functionality
+
+### 6. Update Configuration Files
+- [ ] Clean up `/packages/next-config/index.ts`
+  - Remove Clerk image hostname
+  - Add any necessary Supabase configurations
+- [ ] Update Next.js middleware configurations
+  - Remove Clerk middleware
+  - Implement Supabase auth middleware
+
+### 7. Update CI/CD and Documentation
+- [ ] Update `.github/workflows/build.yml`
+  - Remove Clerk environment variables
+  - Add Supabase environment variables
+- [ ] Update documentation in `/docs`
+  - Update authentication sections
+  - Remove Clerk-specific snippets
+  - Add Supabase authentication documentation
+
+## Progress Notes
+
+### Step 1 Progress:
+- ✅ Successfully removed the `/packages/auth` directory
+- ✅ Updated package.json files to remove @repo/auth and add @repo/supabase:
+  - apps/app/package.json
+  - apps/api/package.json
+  - packages/design-system/package.json
+  - packages/webhooks/package.json
+  - packages/feature-flags/package.json
+- ✅ Updated auth imports and components in:
+  - apps/app/app/(authenticated)/layout.tsx
+  - apps/app/app/(authenticated)/components/posthog-identifier.tsx
+  - apps/app/app/(authenticated)/components/sidebar.tsx
+- ✅ No tsconfig references to update
+- ✅ Fixed user schema usage in components:
+  - Updated PostHogIdentifier to use only base user fields (id, email, created_at)
+  - Updated GlobalSidebar to use email instead of name and UserIcon instead of avatar
+  - Removed all dependencies on user_metadata as it may be empty
+- ✨ Step 1 Complete!
+
+### Step 2 Progress:
+- ✅ Removed all Clerk variables from .env.example files
+- ✅ Added required Supabase environment variables to all .env.example files
+- ✅ Updated env.ts files to use Supabase keys:
+  - Removed auth() from extends array
+  - Added supabase() to extends array
+  - Updated imports to use @repo/supabase/keys
+- 🔄 Next: Remove Clerk variables from actual .env files
+- Note: Make sure to communicate to the team that they need to update their .env files with the new Supabase variables
+
+### Step 3 Progress:
+- ✅ Removed from root package.json:
+  - `@clerk/nextjs`
+  - `@clerk/themes`
+  - `@clerk/types`
+- ✅ Ran `pnpm install` to update lockfile
+- ✅ Verified no remaining Clerk dependencies
+- ✨ Step 3 Complete!
+
+### Step 4 Progress:
+- ✅ Removed webhook routes as they will not be used:
+  - Removed `/apps/api/app/webhooks/stripe/route.ts`
+  - Removed `/apps/api/app/webhooks/clerk/route.ts`
+- Note: Webhook functionality may be implemented later if needed
+- ✨ Step 4 Complete!
+
+### Step 5 Progress:
+- ✅ Updated `/apps/app/app/actions/users/get.ts`:
+  - Replaced Clerk organization management with Supabase auth
+  - Updated user queries to use Supabase auth admin methods
+  - Added proper type imports from @supabase/supabase-js
+- ✅ Updated `/apps/app/app/actions/users/search.ts`:
+  - Replaced Clerk user search with Supabase auth admin methods
+  - Updated user search to use email as the search key
+  - Added proper type imports from @supabase/supabase-js
+- ✨ Step 5 Complete!
+
+### Step 6 Progress:
+- 🔄 Starting: Update Configuration Files
+- Next tasks:
+  1. Clean up `/packages/next-config/index.ts` to remove Clerk image hostname
+  2. Add any necessary Supabase configurations
+  3. Update Next.js middleware to use Supabase auth
+
+### Step 7 Progress:
+_To be filled in as we complete each step_
+
+## Verification Checklist
+- [ ] All Clerk references removed
+- [ ] Supabase auth fully implemented
+- [ ] All tests passing
+- [ ] Documentation updated
+- [ ] CI/CD pipeline updated and passing
+- [ ] No remaining Clerk dependencies
+- [ ] All environment variables updated
+- [ ] Authentication flow tested and working
+
+## Notes
+- Keep track of any unexpected issues or additional steps needed
+- Document any breaking changes that require attention
+- Note any areas that need additional testing 

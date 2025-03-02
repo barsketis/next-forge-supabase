@@ -1,12 +1,12 @@
 'use client';
 
 import { useAnalytics } from '@repo/analytics/posthog/client';
-import { useUser } from '@repo/auth/client';
+import { useUser } from '@repo/supabase/hooks/use-user';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 export const PostHogIdentifier = () => {
-  const { user } = useUser();
+  const { data: user } = useUser();
   const identified = useRef(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -31,12 +31,8 @@ export const PostHogIdentifier = () => {
     }
 
     analytics.identify(user.id, {
-      email: user.emailAddresses.at(0)?.emailAddress,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      createdAt: user.createdAt,
-      avatar: user.imageUrl,
-      phoneNumber: user.phoneNumbers.at(0)?.phoneNumber,
+      email: user.email,
+      created_at: user.created_at,
     });
 
     identified.current = true;
