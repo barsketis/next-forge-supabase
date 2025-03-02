@@ -1,17 +1,32 @@
-import { authMiddleware } from '@repo/auth/middleware';
 import {
   noseconeMiddleware,
   noseconeOptions,
   noseconeOptionsWithToolbar,
 } from '@repo/security/middleware';
+import { createMiddlewareClient } from '@repo/supabase/clients/middleware-client';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { env } from './env';
-import { NextMiddleware } from 'next/server';
 
 const securityHeaders = env.FLAGS_SECRET
   ? noseconeMiddleware(noseconeOptionsWithToolbar)
   : noseconeMiddleware(noseconeOptions);
 
-export default authMiddleware(() => securityHeaders()) as unknown as NextMiddleware;
+export default async function middleware(req: NextRequest) {
+  try {
+    const res = NextResponse.next();
+    // Cast both request and response to any to bypass the type mismatches
+    // This is safe because the underlying implementations are compatible
+    const supabase = createMiddlewareClient(req as any, res as any);
+
+    // Refresh session if expired - required for Server Components
+    await supabase.auth.getSession();
+
+    return securityHeaders();
+  } catch (error) {
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
 
 export const config = {
   matcher: [

@@ -15,9 +15,6 @@ import { Menu, MoveRight, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
-import Image from 'next/image';
-import Logo from './logo.svg';
-
 export const Header = () => {
   const navigationItems = [
     {
@@ -119,13 +116,9 @@ export const Header = () => {
           </NavigationMenu>
         </div>
         <div className="flex items-center gap-2 lg:justify-center">
-          <Image
-            src={Logo}
-            alt="Logo"
-            width={24}
-            height={24}
-            className="dark:invert"
-          />
+          <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-primary-foreground">
+            N
+          </div>
           <p className="whitespace-nowrap font-semibold">next-forge</p>
         </div>
         <div className="flex w-full justify-end gap-4">
@@ -137,10 +130,10 @@ export const Header = () => {
             <ModeToggle />
           </div>
           <Button variant="outline" asChild className="hidden md:inline">
-            <Link href={`${env.NEXT_PUBLIC_APP_URL}/sign-in`}>Sign in</Link>
+            <Link href="/auth/sign-in">Sign in</Link>
           </Button>
           <Button asChild>
-            <Link href={`${env.NEXT_PUBLIC_APP_URL}/sign-up`}>Get started</Link>
+            <Link href="/auth/sign-up">Get started</Link>
           </Button>
         </div>
         <div className="flex w-12 shrink items-end justify-end lg:hidden">

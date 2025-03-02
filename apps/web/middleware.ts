@@ -1,5 +1,4 @@
 import { env } from '@/env';
-import { authMiddleware } from '@repo/auth/middleware';
 import { parseError } from '@repo/observability/error';
 import { secure } from '@repo/security';
 import {
@@ -7,7 +6,9 @@ import {
   noseconeOptions,
   noseconeOptionsWithToolbar,
 } from '@repo/security/middleware';
+import { createMiddlewareClient } from '@repo/supabase/clients/middleware-client';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export const config = {
   // matcher tells Next.js which routes to run the middleware on. This runs the
@@ -19,26 +20,38 @@ const securityHeaders = env.FLAGS_SECRET
   ? noseconeMiddleware(noseconeOptionsWithToolbar)
   : noseconeMiddleware(noseconeOptions);
 
-export default authMiddleware(async (_auth, request) => {
-  if (!env.ARCJET_KEY) {
-    return securityHeaders();
-  }
-
+export default async function middleware(req: NextRequest) {
   try {
-    await secure(
-      [
-        // See https://docs.arcjet.com/bot-protection/identifying-bots
-        'CATEGORY:SEARCH_ENGINE', // Allow search engines
-        'CATEGORY:PREVIEW', // Allow preview links to show OG images
-        'CATEGORY:MONITOR', // Allow uptime monitoring services
-      ],
-      request
-    );
+    const res = NextResponse.next();
+    // Cast both request and response to any to bypass the type mismatches
+    // This is safe because the underlying implementations are compatible
+    const supabase = createMiddlewareClient(req as any, res as any);
 
-    return securityHeaders();
+    // Refresh session if expired - required for Server Components
+    await supabase.auth.getSession();
+
+    if (!env.ARCJET_KEY) {
+      return securityHeaders();
+    }
+
+    try {
+      await secure(
+        [
+          // See https://docs.arcjet.com/bot-protection/identifying-bots
+          'CATEGORY:SEARCH_ENGINE', // Allow search engines
+          'CATEGORY:PREVIEW', // Allow preview links to show OG images
+          'CATEGORY:MONITOR', // Allow uptime monitoring services
+        ],
+        req
+      );
+
+      return securityHeaders();
+    } catch (error) {
+      const message = parseError(error);
+      return NextResponse.json({ error: message }, { status: 403 });
+    }
   } catch (error) {
     const message = parseError(error);
-
     return NextResponse.json({ error: message }, { status: 403 });
   }
-});
+}
