@@ -1,19 +1,21 @@
 # Supabase Auth
 
-A simplified Supabase authentication package for Next.js applications, with a focus on clean separation of concerns and minimal complexity.
+A modern Supabase authentication package for Next.js applications, with support for both low-level authentication state management and pre-built UI components.
 
 ## Features
 
-- Simple, focused API for authentication
+- Flexible authentication patterns (hooks & components)
 - Next.js App Router support
 - TypeScript support
 - Server Components and Server Actions support
+- Social authentication (Google)
 - Clean separation between client and server code
+- Beautiful pre-built UI components
 
 ## Installation
 
 ```bash
-npm install supabase-auth
+npm install @repo/supabase-auth
 ```
 
 ## Usage
@@ -30,17 +32,19 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 ### Client-side Authentication
 
+There are two ways to implement authentication in your application:
+
+#### 1. Using Authentication Context and Hooks
+
 ```tsx
 // app/layout.tsx
-import { AuthProvider } from 'supabase-auth';
+import { AuthProvider } from '@repo/supabase-auth/components';
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
@@ -49,7 +53,7 @@ export default function RootLayout({ children }) {
 // app/profile/page.tsx (client component)
 'use client';
 
-import { useAuth } from 'supabase-auth';
+import { useAuth } from '@repo/supabase-auth/components';
 
 export default function Profile() {
   const { user, isLoading } = useAuth();
@@ -61,62 +65,46 @@ export default function Profile() {
 }
 ```
 
-### Server-side Authentication
+#### 2. Using Pre-built UI Components
 
 ```tsx
-// app/profile/page.tsx (server component)
-import { getServerClient, requireUser } from 'supabase-auth';
-import { redirect } from 'next/navigation';
+// app/(unauthenticated)/sign-in/[[...sign-in]]/page.tsx
+import { SignInForm } from '@repo/supabase-auth/components';
 
-export default async function Profile() {
-  const supabase = getServerClient();
-  const { data: user, error } = await requireUser(supabase);
-  
-  if (error) {
-    redirect('/sign-in');
-  }
-  
-  return <div>Welcome, {user.email}</div>;
+export default function SignInPage() {
+  return (
+    <SignInForm 
+      redirectTo="/"
+      revalidatePaths={['/']}
+      enableGoogleSignIn={true}
+      title="Welcome back"
+      description="Enter your details to sign in"
+    />
+  );
 }
 ```
 
-### Authentication Actions
+### Server-side Authentication
 
 ```tsx
-// app/sign-in/page.tsx
-'use client';
+// app/(authenticated)/layout.tsx
+import { requireUser } from '@repo/supabase-auth';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
+import { redirect } from 'next/navigation';
 
-import { useState } from 'react';
-import { signIn } from 'supabase-auth/actions/auth';
+export default async function AuthenticatedLayout({ 
+  children 
+}: { 
+  children: React.ReactNode 
+}) {
+  const supabase = await getServerClient();
+  const { data: user } = await requireUser(supabase);
 
-export default function SignIn() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { error } = await signIn(email, password);
-    
-    if (error) {
-      console.error('Error signing in:', error.message);
-    }
-  };
-  
-  return (
-    <form onSubmit={handleSubmit}>
-      <input 
-        type="email" 
-        value={email} 
-        onChange={(e) => setEmail(e.target.value)} 
-      />
-      <input 
-        type="password" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)} 
-      />
-      <button type="submit">Sign In</button>
-    </form>
-  );
+  if (!user) {
+    redirect('/sign-in');
+  }
+
+  return <>{children}</>;
 }
 ```
 
@@ -130,22 +118,60 @@ export default function SignIn() {
 
 ### Hooks
 
-- `useAuth()` - Hook to access the auth context
+- `useAuth()` - Hook to access authentication state and user information
 - `useSession()` - Hook to get and subscribe to the current session
 
 ### Components
 
 - `AuthProvider` - Provider component to handle auth state
-- `SignIn` - Pre-built sign-in form
-- `SignUp` - Pre-built sign-up form
-- `SignOut` - Sign-out button
+- `SignInForm` - Pre-built sign-in form with email/password and social authentication
 
-### Actions
+### Server Utilities
 
-- `signIn(email, password)` - Server action to sign in
-- `signUp(email, password)` - Server action to sign up
-- `signOut()` - Server action to sign out
+- `requireUser(client)` - Utility to require authentication in server components
 
-### Utilities
+## Pre-built Components
 
-- `requireUser(client)` - Utility to require authentication 
+### SignInForm
+
+A fully-featured sign-in form component with email/password and Google authentication.
+
+```tsx
+type SignInFormProps = {
+  redirectTo?: string;
+  revalidatePaths?: string[];
+  onSuccess?: (data: { success: true; session: unknown }) => void;
+  onError?: (error: Error) => void;
+  enableGoogleSignIn?: boolean;
+  title?: string;
+  description?: string;
+};
+```
+
+### Error Handling
+
+The package includes built-in error handling with user-friendly messages for common authentication scenarios:
+
+- Invalid credentials
+- Email confirmation required
+- Rate limiting
+- Network issues
+- Account not found
+- Account locked
+
+## Design System Integration
+
+The pre-built components are built on top of the `@repo/design-system` components, ensuring a consistent look and feel across your application. Key components used include:
+
+- Alert
+- Button
+- Card
+- Input
+- Label
+
+## Security
+
+- CSRF protection built-in
+- Secure session handling
+- Environment-based configuration
+- Rate limiting support 
