@@ -3,8 +3,21 @@ import type { CookieOptions } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
-import type { NextRequest, NextResponse } from 'next/server';
+import type {} from 'next/server';
 import { keys } from '../keys';
+
+// Cookie interfaces based on the design doc requirements
+interface CookieReader {
+  cookies: {
+    getAll(): { name: string; value: string }[];
+  };
+}
+
+interface CookieWriter {
+  cookies: {
+    set(options: { name: string; value: string } & CookieOptions): void;
+  };
+}
 
 /**
  * Create a Supabase client for use in server contexts
@@ -65,13 +78,13 @@ export function getAdminClient(): SupabaseClient {
 
 /**
  * Create a Supabase client specifically for use in middleware
- * @param req The Next.js request object
- * @param res The Next.js response object
+ * @param req Object that can read cookies (like NextRequest)
+ * @param res Object that can write cookies (like NextResponse)
  * @returns Supabase client configured for middleware
  */
 export function createServerClientForMiddleware(
-  req: NextRequest,
-  res: NextResponse
+  req: CookieReader,
+  res: CookieWriter
 ): SupabaseClient {
   const env = keys();
 
@@ -80,14 +93,13 @@ export function createServerClientForMiddleware(
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
-        get: (name: string) => {
-          return req.cookies.get(name)?.value;
+        getAll: () => {
+          return req.cookies.getAll();
         },
-        set: (name: string, value: string, options: CookieOptions) => {
-          res.cookies.set({ name, value, ...options });
-        },
-        remove: (name: string, options: CookieOptions) => {
-          res.cookies.set({ name, value: '', ...options });
+        setAll: (cookiesToSet) => {
+          for (const { name, value, options } of cookiesToSet) {
+            res.cookies.set({ name, value, ...options });
+          }
         },
       },
     }

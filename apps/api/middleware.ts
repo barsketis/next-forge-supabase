@@ -6,7 +6,7 @@ import type { NextRequest } from 'next/server';
 export default async function middleware(req: NextRequest) {
   try {
     const res = NextResponse.next();
-    const supabase = createServerClientForMiddleware(req as any, res as any);
+    const supabase = createServerClientForMiddleware(req, res);
 
     // Try to get the session
     const {
