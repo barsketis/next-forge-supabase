@@ -35,7 +35,7 @@ import {
 } from '@repo/design-system/components/ui/sidebar';
 import { cn } from '@repo/design-system/lib/utils';
 import { NotificationsTrigger } from '@repo/notifications/components/trigger';
-import { signOut } from '@repo/supabase-auth/actions/auth';
+import { SignOut } from '@repo/supabase-auth/components';
 import { useSession } from '@repo/supabase-auth/hooks/use-session';
 import {
   AnchorIcon,
@@ -45,7 +45,6 @@ import {
   FolderIcon,
   FrameIcon,
   LifeBuoyIcon,
-  LogOutIcon,
   MapIcon,
   MoreHorizontalIcon,
   PieChartIcon,
@@ -57,7 +56,6 @@ import {
   UserIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import {} from 'react';
 import { Search } from './search';
@@ -199,7 +197,6 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
   const sidebar = useSidebar();
   const { session } = useSession();
   const userEmail = session?.user?.email || '';
-  const router = useRouter();
 
   return (
     <>
@@ -232,21 +229,9 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                       <Link href="/settings/profile">Profile Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <form
-                      action={async () => {
-                        await signOut('/sign-in');
-                      }}
-                    >
-                      <DropdownMenuItem asChild>
-                        <button
-                          type="submit"
-                          className="flex w-full items-center"
-                        >
-                          <LogOutIcon className="mr-2 h-4 w-4" />
-                          Sign Out
-                        </button>
-                      </DropdownMenuItem>
-                    </form>
+                    <DropdownMenuItem asChild>
+                      <SignOut />
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

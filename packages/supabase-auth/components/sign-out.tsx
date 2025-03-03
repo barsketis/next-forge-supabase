@@ -1,11 +1,18 @@
 'use client';
 
+import { ExitIcon } from '@radix-ui/react-icons';
+import { cn } from '@repo/design-system/lib/utils';
 import { parseError } from '@repo/observability/error';
-import { getBrowserClient } from '@repo/supabase-auth/clients/browser';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { getBrowserClient } from '../clients/browser';
 
-export default function SignOutButton() {
+interface SignOutProps {
+  className?: string;
+  redirectUrl?: string;
+}
+
+export function SignOut({ className, redirectUrl = '/sign-in' }: SignOutProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -13,12 +20,8 @@ export default function SignOutButton() {
     try {
       setIsLoading(true);
       const supabase = getBrowserClient();
-
-      // Sign out the user
       await supabase.auth.signOut();
-
-      // Refresh the page to trigger a redirect to the sign-in page
-      router.refresh();
+      router.push(redirectUrl);
     } catch (error) {
       parseError(error);
     } finally {
@@ -31,8 +34,13 @@ export default function SignOutButton() {
       type="button"
       onClick={handleSignOut}
       disabled={isLoading}
-      className="rounded-md bg-red-600 px-4 py-2 font-medium text-sm text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50"
+      className={cn(
+        'flex w-full items-center',
+        isLoading && 'opacity-50',
+        className
+      )}
     >
+      <ExitIcon className="mr-2 h-4 w-4" />
       {isLoading ? 'Signing out...' : 'Sign Out'}
     </button>
   );
