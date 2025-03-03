@@ -5,21 +5,25 @@ import dynamic from 'next/dynamic';
 const title = 'Welcome back';
 const description = 'Enter your details to sign in.';
 const SignInForm = dynamic(() =>
-  import('@repo/supabase-auth/components').then((mod) => mod.SignInForm)
+  import('@repo/supabase-auth/components').then((mod) => mod.SignIn)
 );
 
 export const metadata: Metadata = createMetadata({ title, description });
 
-const SignInPage = () => (
-  <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-    <SignInForm
-      redirectTo="/"
-      revalidatePaths={['/']}
-      enableGoogleSignIn={true}
-      title={title}
-      description={description}
-    />
-  </div>
-);
-
-export default SignInPage;
+export default function SignInPage({
+  searchParams,
+}: {
+  searchParams?: { returnTo?: string };
+}) {
+  return (
+    <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+      <SignInForm
+        redirectTo={searchParams?.returnTo || '/'}
+        revalidatePaths={['/']}
+        enableGoogleSignIn={true}
+        title={title}
+        description={description}
+      />
+    </div>
+  );
+}

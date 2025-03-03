@@ -15,6 +15,14 @@ export const emailPasswordSchema = z.object({
 });
 
 /**
+ * Validation schema for password only
+ */
+export const passwordSchema = z
+  .string()
+  .min(6, 'Password must be at least 6 characters')
+  .max(72, 'Password must be less than 72 characters');
+
+/**
  * Validation schema for email only
  */
 export const emailSchema = z.object({
