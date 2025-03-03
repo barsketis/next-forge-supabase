@@ -1,4 +1,10 @@
-export * from './actions/auth';
+// Client-side hooks
 export * from './hooks/use-session';
-export * from './schemas';
+
+// Server-side utilities
 export * from './server-client';
+export * from './server-auth';
+export * from './session-debug';
+
+// Actions
+export * from './actions/auth';

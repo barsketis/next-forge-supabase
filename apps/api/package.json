@@ -23,7 +23,7 @@
     "@repo/next-config": "workspace:*",
     "@repo/observability": "workspace:*",
     "@repo/payments": "workspace:*",
-    "@repo/supabase": "workspace:*",
+    "@repo/supabase-auth": "workspace:*",
     "@repo/testing": "workspace:*",
     "@sentry/nextjs": "^9.1.0",
     "@t3-oss/env-nextjs": "^0.12.0",
