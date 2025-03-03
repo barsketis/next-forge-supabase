@@ -14,9 +14,9 @@ import {
   TabsTrigger,
 } from '@repo/design-system/components/ui/tabs';
 import { getServerClient } from '@repo/supabase-auth/clients/server';
+import { SignOut } from '@repo/supabase-auth/components';
 import type { Metadata } from 'next';
 import { Header } from '../components/header';
-import SignOutButton from '../components/sign-out-button';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -37,7 +37,7 @@ export default async function DashboardPage() {
     <>
       <Header pages={['Dashboard']} page="Overview">
         <div className="ml-auto">
-          <SignOutButton />
+          <SignOut />
         </div>
       </Header>
 
