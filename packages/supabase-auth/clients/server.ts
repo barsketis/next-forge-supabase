@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import type { CookieOptions } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import type { NextRequest, NextResponse } from 'next/server';
@@ -18,17 +19,21 @@ export function getServerClient(): SupabaseClient {
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
-        get: async (name: string) => {
+        getAll: async () => {
           const cookieStore = await cookies();
-          return cookieStore.get(name)?.value;
+          return cookieStore.getAll();
         },
-        set: async (name: string, value: string, options: CookieOptions) => {
-          const cookieStore = await cookies();
-          cookieStore.set(name, value, options);
-        },
-        remove: async (name: string, options: CookieOptions) => {
-          const cookieStore = await cookies();
-          cookieStore.set(name, '', { ...options, maxAge: 0 });
+        setAll: async (cookiesToSet) => {
+          try {
+            const cookieStore = await cookies();
+            for (const { name, value, options } of cookiesToSet) {
+              cookieStore.set(name, value, options);
+            }
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
       },
     }
@@ -39,21 +44,20 @@ export function getServerClient(): SupabaseClient {
  * Create a server client with admin privileges
  * Use this for operations that require full database access
  * IMPORTANT: Only use on the server, never expose this client to the browser
+ * https://supabase.com/docs/guides/troubleshooting/performing-administration-tasks-on-the-server-side-with-the-servicerole-secret-BYM4Fa
  * @returns Supabase client with admin privileges
  */
 export function getAdminClient(): SupabaseClient {
   const env = keys();
 
-  // This function requires SUPABASE_SERVICE_ROLE_KEY to be set in environment variables
-  return createServerClient(
+  return createClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.SUPABASE_SERVICE_ROLE_KEY,
     {
-      // Admin client needs minimal cookie handling as it's only used server-side
-      cookies: {
-        get: async () => undefined,
-        set: async () => {},
-        remove: async () => {},
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
       },
     }
   );
