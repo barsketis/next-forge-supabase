@@ -88,21 +88,19 @@ This separation of concerns ensures your authentication works seamlessly across 
 
 ## Setup
 
-First, create a `.env.local` file with your Supabase credentials:
-
-Second, follow the instructions for the next-forge supabase db integration
-
-Add your `.env` in packages/database to direct query the supa instance, find these by clicking the "connect" button above the table, make sure to add ?pgbouncer=true&connection_limit=1" to the 6543 route
-```
-DATABASE_URL="postgresql://postgres.qpifrnvmlcdrqbomgbkq:[YOUR-PASSWORD]@[YOUR-DB-HOST]:6543/postgres?pgbouncer=true&connection_limit=1"
-DIRECT_URL="postgresql://postgres:[YOUR-PASSWORD]@[YOUR-DB-HOST]:6543/postgres"
-```
-
-Add your `.env` in packages/supabase-auth
+First, create a `.env.local` file with your Supabase credentials - packages/supabase-auth
 ```
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+Second, follow the instructions for the next-forge supabase db integration in the docs
+
+Add your `.env.local` in packages/database to direct query the supa instance, find these by clicking the "connect" button above the table, make sure to add ?pgbouncer=true&connection_limit=1" to the 6543 route
+```
+DATABASE_URL="postgresql://postgres.qpifrnvmlcdrqbomgbkq:[YOUR-PASSWORD]@[YOUR-DB-HOST]:6543/postgres?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://postgres:[YOUR-PASSWORD]@[YOUR-DB-HOST]:6543/postgres"
 ```
 
 ## Installation
