@@ -138,7 +138,7 @@ export function SignIn({
       });
 
       if (revalidatePaths.length > 0) {
-        for (const path of revalidatePaths) {
+        for (const _ of revalidatePaths) {
           router.refresh();
         }
       }

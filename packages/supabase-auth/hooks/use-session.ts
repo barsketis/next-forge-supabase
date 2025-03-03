@@ -18,7 +18,7 @@ export function useSession() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, session: Session | null) => {
+      (_: AuthChangeEvent, session: Session | null) => {
         setSession(session);
         setLoading(false);
       }

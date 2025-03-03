@@ -110,7 +110,9 @@ export function SignUp({
       });
 
       if (revalidatePaths.length > 0) {
-        router.refresh();
+        for (const _ of revalidatePaths) {
+          router.refresh();
+        }
       }
 
       setIsLoading(false);
