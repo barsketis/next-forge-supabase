@@ -20,6 +20,7 @@ import { log } from '@repo/observability/log';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
+import type React from 'react';
 import { getBrowserClient } from '../clients/browser';
 import { emailPasswordSchema } from '../utils/schemas';
 
@@ -109,9 +110,7 @@ export function SignUp({
       });
 
       if (revalidatePaths.length > 0) {
-        for (const path of revalidatePaths) {
-          router.refresh();
-        }
+        router.refresh();
       }
 
       setIsLoading(false);

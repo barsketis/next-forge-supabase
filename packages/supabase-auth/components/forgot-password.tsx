@@ -18,7 +18,7 @@ import { Input } from '@repo/design-system/components/ui/input';
 import { Label } from '@repo/design-system/components/ui/label';
 import { log } from '@repo/observability/log';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import type React from 'react';
 import { useCallback, useState } from 'react';
 import { getBrowserClient } from '../clients/browser';
 import { emailSchema } from '../utils/schemas';
@@ -38,7 +38,6 @@ export function ForgotPassword({
   title = 'Reset your password',
   description = 'Enter your email address and we will send you a reset link',
 }: ForgotPasswordProps) {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

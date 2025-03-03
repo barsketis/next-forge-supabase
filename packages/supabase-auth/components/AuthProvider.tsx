@@ -1,6 +1,7 @@
 'use client';
 
 import { parseError } from '@repo/observability/error';
+import { log } from '@repo/observability/log';
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
@@ -33,45 +34,51 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const supabase = getBrowserClient();
 
   useEffect(() => {
-    // Get the initial session and user
-    const initializeAuth = async () => {
+    async function getSession() {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      if (error) {
+        log.error('Error getting session:', { error });
+        throw error;
+      }
+      return session;
+    }
+
+    async function getUser() {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      if (error) {
+        log.error('Error getting user:', { error });
+        throw error;
+      }
+      return user;
+    }
+
+    async function initializeAuth() {
       try {
         setIsLoading(true);
-
-        // Get session
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession();
-
-        if (sessionError) {
-          throw sessionError;
-        }
-
+        const session = await getSession();
         setSession(session);
 
-        // Get user if session exists
         if (session) {
-          const {
-            data: { user },
-            error: userError,
-          } = await supabase.auth.getUser();
-
-          if (userError) {
-            throw userError;
-          }
-
+          const user = await getUser();
           setUser(user);
         }
       } catch (err) {
-        parseError(err);
-        setError(
-          err instanceof Error ? err : new Error('Unknown authentication error')
-        );
+        const errorMessage = parseError(err);
+        log.error('Authentication initialization failed:', {
+          error: err,
+          message: errorMessage,
+        });
+        setError(err instanceof Error ? err : new Error(errorMessage));
       } finally {
         setIsLoading(false);
       }
-    };
+    }
 
     initializeAuth();
 

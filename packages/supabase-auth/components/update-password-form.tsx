@@ -17,6 +17,7 @@ import { Input } from '@repo/design-system/components/ui/input';
 import { Label } from '@repo/design-system/components/ui/label';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
+import type React from 'react';
 import { getBrowserClient } from '../clients/browser';
 import { passwordSchema } from '../utils/schemas';
 

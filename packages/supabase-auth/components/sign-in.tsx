@@ -16,8 +16,10 @@ import {
 import { Input } from '@repo/design-system/components/ui/input';
 import { Label } from '@repo/design-system/components/ui/label';
 import { log } from '@repo/observability/log';
+import { AuthError } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { getBrowserClient } from '../clients/browser';
 import { emailPasswordSchema } from '../utils/schemas';
@@ -58,32 +60,43 @@ export function SignIn({
 
   const handleError = useCallback(
     (error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error);
-      let userMessage = message;
+      const getErrorMessage = (error: AuthError): string => {
+        const handle400Error = (message: string): string => {
+          if (message.includes('Invalid login credentials')) {
+            return 'The email or password you entered is incorrect';
+          }
+          if (message.includes('Email not confirmed')) {
+            return 'Please check your email to confirm your account';
+          }
+          return 'Invalid request. Please check your input.';
+        };
 
-      if (message.includes('Invalid login credentials')) {
-        userMessage = 'The email or password you entered is incorrect';
-      } else if (message.includes('Email not confirmed')) {
-        userMessage = 'Please check your email to confirm your account';
-      } else if (message.includes('Rate limit')) {
-        userMessage = 'Too many sign in attempts. Please try again later';
-      } else if (message.includes('Network')) {
-        userMessage =
-          'Unable to connect. Please check your internet connection';
-      } else if (message.includes('User not found')) {
-        userMessage = 'No account found with this email address';
-      } else if (message.includes('Account locked')) {
-        userMessage = 'Your account has been locked. Please contact support';
-      }
+        switch (error.status) {
+          case 400:
+            return handle400Error(error.message);
+          case 429:
+            return 'Too many sign in attempts. Please try again later';
+          case 500:
+            return 'Unable to connect. Please try again later';
+          default:
+            return error.message;
+        }
+      };
+
+      const userMessage =
+        error instanceof AuthError
+          ? getErrorMessage(error)
+          : 'An unexpected error occurred';
 
       log.error('Sign in failed', {
         event: 'sign_in_failed',
-        error: message,
+        error: error instanceof Error ? error.message : String(error),
+        status: error instanceof AuthError ? error.status : undefined,
         email: email.toLowerCase(),
       });
 
       setError(userMessage);
-      onError?.(error instanceof Error ? error : new Error(message));
+      onError?.(error instanceof Error ? error : new Error(userMessage));
     },
     [onError, email]
   );
