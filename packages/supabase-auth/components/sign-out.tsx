@@ -1,6 +1,7 @@
 'use client';
 
 import { ExitIcon } from '@radix-ui/react-icons';
+import { Button } from '@repo/design-system/components/ui/button';
 import { cn } from '@repo/design-system/lib/utils';
 import { parseError } from '@repo/observability/error';
 import { useRouter } from 'next/navigation';
@@ -30,18 +31,15 @@ export function SignOut({ className, redirectUrl = '/sign-in' }: SignOutProps) {
   };
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={handleSignOut}
       disabled={isLoading}
-      className={cn(
-        'flex w-full items-center',
-        isLoading && 'opacity-50',
-        className
-      )}
+      className={cn('w-full gap-2 hover:bg-muted', className)}
     >
-      <ExitIcon className="mr-2 h-4 w-4" />
+      <ExitIcon className="h-4 w-4" />
       {isLoading ? 'Signing out...' : 'Sign Out'}
-    </button>
+    </Button>
   );
 }

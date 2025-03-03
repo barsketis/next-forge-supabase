@@ -36,7 +36,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Header pages={['Dashboard']} page="Overview">
-        <div className="ml-auto">
+        <div className="ml-auto pr-4">
           <SignOut />
         </div>
       </Header>

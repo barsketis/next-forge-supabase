@@ -49,7 +49,7 @@ export function SignIn({
 }: SignInProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = searchParams.get('returnTo') || '';
+  const [returnTo, setReturnTo] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +57,13 @@ export function SignIn({
   const [error, setError] = useState<string | null>(null);
   const supabase = getBrowserClient();
   const { error: authError } = useAuth();
+
+  // Handle search params in an effect
+  useEffect(() => {
+    if (searchParams) {
+      setReturnTo(searchParams.get('returnTo') || '');
+    }
+  }, [searchParams]);
 
   const handleError = useCallback(
     (error: unknown) => {
