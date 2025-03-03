@@ -19,7 +19,8 @@
     "supabase:start": "pnpm --filter {api,app,web} supabase:start",
     "supabase:stop": "pnpm --filter {api,app,web} supabase:stop",
     "supabase:reset": "pnpm --filter {api,app,web} supabase:reset",
-    "supabase:status": "pnpm --filter {api,app,web} supabase:status"
+    "supabase:status": "pnpm --filter {api,app,web} supabase:status",
+    "supabase:typegen": "pnpm --filter {api,app,web} supabase:typegen"
   },
   "devDependencies": {
     "@auto-it/first-time-contributor": "^11.3.0",

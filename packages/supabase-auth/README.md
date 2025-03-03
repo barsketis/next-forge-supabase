@@ -84,21 +84,48 @@ When a user visits your application:
 
 This separation of concerns ensures your authentication works seamlessly across server and client environments.
 
-## Installation
 
-```bash
-npm install @repo/supabase-auth
-```
 
 ## Setup
 
 First, create a `.env.local` file with your Supabase credentials:
 
+Second, follow the instructions for the next-forge supabase db integration
+
+Add your `.env` in packages/database to direct query the supa instance, find these by clicking the "connect" button above the table, make sure to add ?pgbouncer=true&connection_limit=1" to the 6543 route
+```
+DATABASE_URL="postgresql://postgres.qpifrnvmlcdrqbomgbkq:[YOUR-PASSWORD]@[YOUR-DB-HOST]:6543/postgres?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://postgres:[YOUR-PASSWORD]@[YOUR-DB-HOST]:6543/postgres"
+```
+
+Add your `.env` in packages/supabase-auth
 ```
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
+
+## Installation
+
+```bash
+pnpm install --filter packages/supabase-auth
+```
+
+Create the DB instance from the `schema.prisma` file found in your package/database
+```bash
+pnpm migrate
+```
+This command will:
+1. Format your Prisma schema
+2. Generate Prisma client code
+3. Push the schema changes to your database
+
+```sh
+# Generate Supabase TypeScript types
+pnpm supabase:typegen
+```
+This is optional but can be helpful for maintaining type safety when interacting with your Supabase database. Prisma is not needed with supabase, so you may remove the database folder, and use the db types / supabase client for db queries.
+
 
 ## Usage Examples
 
