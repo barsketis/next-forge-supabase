@@ -12,25 +12,45 @@ const securityHeaders = env.FLAGS_SECRET
   ? noseconeMiddleware(noseconeOptionsWithToolbar)
   : noseconeMiddleware(noseconeOptions);
 
-export async function middleware(request: NextRequest) {
+// Static assets and API routes that should bypass auth
+const BYPASS_PATHS = ['/api', '/_next', '/static', '/ingest', '/favicon.ico'];
+
+export async function middleware(req: NextRequest) {
   try {
-    const response = NextResponse.next();
+    const pathname = req.nextUrl.pathname;
+
+    // Early return for bypassed paths
+    if (BYPASS_PATHS.some((path) => pathname.startsWith(path))) {
+      return NextResponse.next();
+    }
+
+    const res = NextResponse.next();
 
     // Create Supabase client for auth
-    const supabase = createMiddlewareClient(request, response);
-    await supabase.auth.getSession();
+    // @ts-ignore - Next.js types mismatch between packages
+    const supabase = createMiddlewareClient(req, res);
+
+    // Get session
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    // Debug logging
+    console.log({
+      pathname,
+      hasSession: !!session,
+    });
 
     // Apply security headers
     const securityResponse = await securityHeaders();
-
-    // Copy security headers to our response
     for (const [key, value] of Object.entries(securityResponse.headers)) {
       if (typeof value === 'string') {
-        response.headers.set(key, value);
+        res.headers.set(key, value);
       }
     }
 
-    return response;
+    // Let the route group layouts handle their own auth
+    return res;
   } catch (error) {
     console.error('Middleware error:', error);
     return NextResponse.json(
@@ -44,13 +64,10 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-    '/api/:path*',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

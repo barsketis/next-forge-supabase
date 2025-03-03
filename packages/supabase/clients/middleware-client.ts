@@ -25,12 +25,26 @@ export function createMiddlewareClient<GenericSchema = Database>(
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          for (const { name, value } of cookiesToSet) {
-            request.cookies.set(name, value);
+          // Clear existing auth cookies first
+          const cookiesToClear = ['sb-access-token', 'sb-refresh-token'];
+          for (const name of cookiesToClear) {
+            if (request.cookies.has(name)) {
+              response.cookies.delete(name);
+            }
           }
 
-          for (const { name, value, options } of cookiesToSet) {
-            response.cookies.set(name, value, options);
+          // Set new cookies
+          for (const cookie of cookiesToSet) {
+            response.cookies.set({
+              name: cookie.name,
+              value: cookie.value,
+              ...cookie.options,
+              // Ensure cookies have reasonable max age
+              maxAge: Math.min(
+                cookie.options?.maxAge || 60 * 60 * 24,
+                60 * 60 * 24
+              ), // Max 24 hours
+            });
           }
         },
       },

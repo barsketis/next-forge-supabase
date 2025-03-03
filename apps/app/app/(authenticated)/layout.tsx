@@ -3,7 +3,7 @@ import { SidebarProvider } from '@repo/design-system/components/ui/sidebar';
 import { showBetaFeature } from '@repo/feature-flags';
 import { NotificationsProvider } from '@repo/notifications/components/provider';
 import { secure } from '@repo/security';
-import { getSupabaseServerClient } from '@repo/supabase/server';
+import { getSupabaseAppServerClient } from '@repo/supabase/app-router';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { PostHogIdentifier } from './components/posthog-identifier';
@@ -14,19 +14,26 @@ type AppLayoutProperties = {
 };
 
 const AppLayout = async ({ children }: AppLayoutProperties) => {
+  console.log('Authenticated layout rendering');
+
   if (env.ARCJET_KEY) {
     await secure(['CATEGORY:PREVIEW']);
   }
 
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseAppServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
   const betaFeature = await showBetaFeature();
 
+  console.log('Authenticated layout session status:', !!session);
+
   if (!session) {
+    console.log('Authenticated layout redirecting to sign-in');
     redirect('/sign-in');
   }
+
+  console.log('Authenticated layout rendering content');
 
   return (
     <NotificationsProvider userId={session.user.id}>

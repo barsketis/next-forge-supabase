@@ -236,7 +236,11 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                       <Link href="/settings/profile">Profile Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <form action={signOut}>
+                    <form
+                      action={async () => {
+                        await signOut({ redirectTo: '/sign-in' });
+                      }}
+                    >
                       <DropdownMenuItem asChild>
                         <button
                           type="submit"

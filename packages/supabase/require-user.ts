@@ -1,6 +1,6 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 
-const SIGN_IN_PATH = '/auth/sign-in';
+const SIGN_IN_PATH = '/sign-in';
 
 /**
  * @name requireUser
