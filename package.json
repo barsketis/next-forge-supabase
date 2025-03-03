@@ -18,7 +18,6 @@
     "clean": "git clean -xdf node_modules",
     "supabase:start": "pnpm --filter {api,app,web} supabase:start",
     "supabase:stop": "pnpm --filter {api,app,web} supabase:stop",
-    "supabase:typegen": "supabase gen types typescript --local > ./packages/supabase-auth/database.types.ts",
     "supabase:reset": "pnpm --filter {api,app,web} supabase:reset",
     "supabase:status": "pnpm --filter {api,app,web} supabase:status"
   },

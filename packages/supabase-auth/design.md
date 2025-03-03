@@ -1,7 +1,7 @@
 # Design
 
 This document should help clarify how this library works internally and why
-certain choices were made.
+certain choices were made. This is from supabase official repo for their SSR library
 
 ## Data flows
 

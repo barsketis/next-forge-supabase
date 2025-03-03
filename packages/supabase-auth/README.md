@@ -4,13 +4,31 @@ A modern Supabase authentication package for Next.js applications, with support 
 
 ## Features
 
-- Flexible authentication patterns (hooks & components)
-- Next.js App Router support
-- TypeScript support
-- Server Components and Server Actions support
-- Social authentication (Google)
-- Clean separation between client and server code
-- Beautiful pre-built UI components
+### Currently Available
+- ✅ Flexible authentication patterns (hooks & components)
+- ✅ Next.js App Router support
+- ✅ TypeScript support
+- ✅ Server Components and Server Actions support
+- ✅ Clean separation between client and server code
+- ✅ Beautiful pre-built UI components
+- ✅ Email/password authentication
+- ✅ Password reset flow
+- ✅ Cookie-based session management
+- ✅ Comprehensive error handling
+- ✅ Environment variable validation
+
+### Coming Soon
+- ⏳  Social authentication (Google) - needs the webhooks, but form is integrated
+- ⏳ Two-Factor Authentication (2FA)
+- ⏳ Multi-Factor Authentication (MFA)
+- ⏳ Phone number authentication
+- ⏳ Magic link authentication
+- ⏳ Email verification flow
+- ⏳ Enhanced session management
+- ⏳ Rate limiting
+- ⏳ Account locking
+- ⏳ Password strength requirements
+- ⏳ User profile management
 
 ## Installation
 
@@ -125,10 +143,13 @@ export default async function AuthenticatedLayout({
 
 - `AuthProvider` - Provider component to handle auth state
 - `SignInForm` - Pre-built sign-in form with email/password and social authentication
+- `SignUpForm` - Pre-built sign-up form with email/password and social authentication
+- `ForgotPasswordForm` - Pre-built form for password reset requests
 
 ### Server Utilities
 
 - `requireUser(client)` - Utility to require authentication in server components
+- `updateSession(request)` - Middleware utility to handle session refresh
 
 ## Pre-built Components
 
@@ -157,7 +178,8 @@ The package includes built-in error handling with user-friendly messages for com
 - Rate limiting
 - Network issues
 - Account not found
-- Account locked
+- Invalid email format
+- Password requirements
 
 ## Design System Integration
 
@@ -174,4 +196,13 @@ The pre-built components are built on top of the `@repo/design-system` component
 - CSRF protection built-in
 - Secure session handling
 - Environment-based configuration
-- Rate limiting support 
+- JWT validation
+- Cookie security flags
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## License
+
+MIT 
