@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 const title = 'Create an account';
 const description = 'Enter your details to get started.';
 const SignUp = dynamic(() =>
-  import('@repo/supabase/components/sign-up').then((mod) => mod.SignUp)
+  import('@repo/supabase-auth/components').then((mod) => mod.SignUp)
 );
 
 export const metadata: Metadata = createMetadata({ title, description });
