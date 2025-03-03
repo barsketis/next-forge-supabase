@@ -13,7 +13,7 @@ export const metadata: Metadata = createMetadata({ title, description });
 export default function SignInPage({
   searchParams,
 }: {
-  searchParams?: { returnTo?: string };
+  searchParams: { returnTo?: string };
 }) {
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
