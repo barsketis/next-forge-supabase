@@ -9,14 +9,9 @@
   "exports": {
     ".": "./index.ts",
     "./client": "./client.ts",
-    "./middleware": "./middleware.ts",
     "./server": "./server.ts",
-    "./keys": "./keys.ts",
-    "./server-client": "./clients/server-client.ts",
-    "./server-admin-client": "./clients/server-admin-client.ts",
-    "./middleware-client": "./clients/middleware-client.ts",
-    "./browser-client": "./clients/browser-client.ts",
-    "./require-user": "./require-user.ts",
+    "./app-router": "./app-router/index.ts",
+    "./app-router/*": "./app-router/*.ts",
     "./database": "./database.types.ts"
   },
   "dependencies": {

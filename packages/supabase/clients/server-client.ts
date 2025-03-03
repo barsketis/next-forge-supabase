@@ -25,17 +25,23 @@ export function getSupabaseServerClient<
     {
       cookies: {
         get(name: string) {
-          if (!cookieStore) return undefined;
+          if (!cookieStore) {
+            return undefined;
+          }
           const value = cookieStore.get(name);
           return value instanceof Promise ? value : Promise.resolve(value);
         },
         set(name: string, value: string, options?: CookieOptions) {
-          if (!cookieStore) return;
+          if (!cookieStore) {
+            return;
+          }
           const result = cookieStore.set(name, value, options);
           return result instanceof Promise ? result : Promise.resolve();
         },
         remove(name: string, options?: CookieOptions) {
-          if (!cookieStore) return;
+          if (!cookieStore) {
+            return;
+          }
           const result = cookieStore.set(name, '', { ...options, maxAge: 0 });
           return result instanceof Promise ? result : Promise.resolve();
         },

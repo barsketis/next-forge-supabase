@@ -1,7 +1,7 @@
 'use client';
 
 import { useAnalytics } from '@repo/analytics/posthog/client';
-import { useSession } from '@repo/supabase/hooks/use-session';
+import { useSession } from '@repo/supabase/app-router/hooks/use-session';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 

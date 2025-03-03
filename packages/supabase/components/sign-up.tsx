@@ -5,7 +5,7 @@ import { Input } from '@repo/design-system/components/ui/input';
 import { useToast } from '@repo/design-system/components/ui/use-toast';
 import { parseError } from '@repo/observability/error';
 import { useFormStatus } from 'react-dom';
-import { signUp } from '../actions/auth';
+import { signUp } from '../app-router/actions/auth';
 
 function SignUpButton() {
   const { pending } = useFormStatus();

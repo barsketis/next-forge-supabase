@@ -4,7 +4,7 @@ import { Button } from '@repo/design-system/components/ui/button';
 import { useToast } from '@repo/design-system/components/ui/use-toast';
 import { parseError } from '@repo/observability/error';
 import { useFormStatus } from 'react-dom';
-import { signOut } from '../actions/auth';
+import { signOut } from '../app-router/actions/auth';
 
 function SignOutButton() {
   const { pending } = useFormStatus();

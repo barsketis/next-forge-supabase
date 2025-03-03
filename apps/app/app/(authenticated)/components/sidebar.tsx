@@ -36,7 +36,7 @@ import {
 import { cn } from '@repo/design-system/lib/utils';
 import { NotificationsTrigger } from '@repo/notifications/components/trigger';
 import { signOut } from '@repo/supabase';
-import { useSession } from '@repo/supabase/hooks/use-session';
+import { useSession } from '@repo/supabase/app-router/hooks/use-session';
 import {
   AnchorIcon,
   BookOpenIcon,
