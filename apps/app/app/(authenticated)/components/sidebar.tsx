@@ -1,6 +1,7 @@
 'use client';
 
 import { ModeToggle } from '@repo/design-system/components/mode-toggle';
+import {} from '@repo/design-system/components/ui/avatar';
 import { Button } from '@repo/design-system/components/ui/button';
 import {
   Collapsible,
@@ -34,13 +35,8 @@ import {
 } from '@repo/design-system/components/ui/sidebar';
 import { cn } from '@repo/design-system/lib/utils';
 import { NotificationsTrigger } from '@repo/notifications/components/trigger';
-import { useUser } from '@repo/supabase/hooks/use-user';
-import { useSupabase } from '@repo/supabase/hooks/use-supabase';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@repo/design-system/components/ui/avatar';
+import { signOut } from '@repo/supabase';
+import { useSession } from '@repo/supabase/hooks/use-session';
 import {
   AnchorIcon,
   BookOpenIcon,
@@ -63,6 +59,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
+import {} from 'react';
 import { Search } from './search';
 
 type GlobalSidebarProperties = {
@@ -200,16 +197,13 @@ const data = {
 
 export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
   const sidebar = useSidebar();
-  const { data: user } = useUser();
-  const supabase = useSupabase();
+  const { session } = useSession();
+  const userEmail = session?.user?.email || '';
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push('/sign-in');
+    await signOut();
   };
-
-  const userEmail = user?.email || '';
 
   return (
     <>
@@ -225,14 +219,15 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
               >
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-start gap-2">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-2"
+                    >
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted">
                         <UserIcon className="h-4 w-4" />
                       </div>
                       {sidebar.open && (
-                        <span className="truncate">
-                          {userEmail}
-                        </span>
+                        <span className="truncate">{userEmail}</span>
                       )}
                     </Button>
                   </DropdownMenuTrigger>
@@ -241,10 +236,17 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                       <Link href="/settings/profile">Profile Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      <LogOutIcon className="mr-2 h-4 w-4" />
-                      Sign Out
-                    </DropdownMenuItem>
+                    <form action={signOut}>
+                      <DropdownMenuItem asChild>
+                        <button
+                          type="submit"
+                          className="flex w-full items-center"
+                        >
+                          <LogOutIcon className="mr-2 h-4 w-4" />
+                          Sign Out
+                        </button>
+                      </DropdownMenuItem>
+                    </form>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

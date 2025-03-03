@@ -25,7 +25,7 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
   const betaFeature = await showBetaFeature();
 
   if (!session) {
-    redirect('/login');
+    redirect('/sign-in');
   }
 
   return (

@@ -12,27 +12,45 @@ const securityHeaders = env.FLAGS_SECRET
   ? noseconeMiddleware(noseconeOptionsWithToolbar)
   : noseconeMiddleware(noseconeOptions);
 
-export default async function middleware(req: NextRequest) {
+export async function middleware(request: NextRequest) {
   try {
-    const res = NextResponse.next();
-    // Cast both request and response to any to bypass the type mismatches
-    // This is safe because the underlying implementations are compatible
-    const supabase = createMiddlewareClient(req as any, res as any);
+    const response = NextResponse.next();
 
-    // Refresh session if expired - required for Server Components
+    // Create Supabase client for auth
+    const supabase = createMiddlewareClient(request, response);
     await supabase.auth.getSession();
 
-    return securityHeaders();
+    // Apply security headers
+    const securityResponse = await securityHeaders();
+
+    // Copy security headers to our response
+    for (const [key, value] of Object.entries(securityResponse.headers)) {
+      if (typeof value === 'string') {
+        response.headers.set(key, value);
+      }
+    }
+
+    return response;
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Middleware error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/api/:path*',
   ],
 };

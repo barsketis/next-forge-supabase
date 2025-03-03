@@ -131,7 +131,7 @@ export async function signOut() {
   const supabase = getSupabaseServerClient();
   await supabase.auth.signOut();
   revalidatePath('/', 'layout');
-  redirect('/login');
+  redirect('/sign-in');
 }
 
 export async function getSession() {

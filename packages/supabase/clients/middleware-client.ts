@@ -1,14 +1,11 @@
-import 'server-only';
-
-import type { NextRequest, NextResponse } from 'next/server';
-
 import { createServerClient } from '@supabase/ssr';
-
+import type { NextRequest, NextResponse } from 'next/server';
 import type { Database } from '../database.types';
 import { keys } from '../keys';
 
 /**
  * Creates a middleware client for Supabase.
+ * This client is specifically for use in Next.js middleware.
  *
  * @param {NextRequest} request - The Next.js request object.
  * @param {NextResponse} response - The Next.js response object.

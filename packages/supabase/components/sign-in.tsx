@@ -5,7 +5,7 @@ import { Input } from '@repo/design-system/components/ui/input';
 import { useToast } from '@repo/design-system/components/ui/use-toast';
 import { parseError } from '@repo/observability/error';
 import { useFormStatus } from 'react-dom';
-import { signInWithPassword } from '../actions/auth';
+import { signInWithPassword } from '../app-router/actions/auth';
 
 function SignInButton() {
   const { pending } = useFormStatus();

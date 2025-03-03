@@ -1,17 +1,22 @@
-import 'server-only';
-
-import { cookies } from 'next/headers';
-
 import { createServerClient } from '@supabase/ssr';
-
+import type { CookieOptions } from '@supabase/ssr';
 import type { Database } from '../database.types';
 import { keys } from '../keys';
 
 /**
- * @name getSupabaseServerClient
- * @description Creates a Supabase client for use in the Server.
+ * Creates a Supabase client for use in the Server.
+ * This is a base implementation that works with any cookie store.
  */
-export function getSupabaseServerClient<GenericSchema = Database>() {
+export function getSupabaseServerClient<
+  GenericSchema = Database,
+>(cookieStore?: {
+  get: (name: string) => Promise<string | undefined> | string | undefined;
+  set: (
+    name: string,
+    value: string,
+    options?: CookieOptions
+  ) => Promise<void> | void;
+}) {
   const env = keys();
 
   return createServerClient<GenericSchema>(
@@ -19,23 +24,20 @@ export function getSupabaseServerClient<GenericSchema = Database>() {
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
-        async getAll() {
-          const cookieStore = await cookies();
-
-          return cookieStore.getAll();
+        get(name: string) {
+          if (!cookieStore) return undefined;
+          const value = cookieStore.get(name);
+          return value instanceof Promise ? value : Promise.resolve(value);
         },
-        async setAll(cookiesToSet) {
-          const cookieStore = await cookies();
-
-          try {
-            for (const { name, value, options } of cookiesToSet) {
-              cookieStore.set(name, value, options);
-            }
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
+        set(name: string, value: string, options?: CookieOptions) {
+          if (!cookieStore) return;
+          const result = cookieStore.set(name, value, options);
+          return result instanceof Promise ? result : Promise.resolve();
+        },
+        remove(name: string, options?: CookieOptions) {
+          if (!cookieStore) return;
+          const result = cookieStore.set(name, '', { ...options, maxAge: 0 });
+          return result instanceof Promise ? result : Promise.resolve();
         },
       },
     }

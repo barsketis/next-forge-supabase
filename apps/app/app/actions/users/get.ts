@@ -1,8 +1,8 @@
 'use server';
 
-import { getSupabaseServerClient } from '@repo/supabase/server';
-import type { User } from '@supabase/supabase-js';
+import { getSupabaseServerAdminClient } from '@repo/supabase/clients/server-admin-client';
 import { tailwind } from '@repo/tailwind-config';
+import type { User } from '@supabase/supabase-js';
 
 const colors = [
   tailwind.theme.colors.red[500],
@@ -35,7 +35,7 @@ export const getUsers = async (
     }
 > => {
   try {
-    const supabase = getSupabaseServerClient();
+    const supabase = getSupabaseServerAdminClient();
     const { data: session } = await supabase.auth.getSession();
 
     if (!session.session?.user) {
@@ -45,7 +45,9 @@ export const getUsers = async (
     // Get all users from the requested IDs
     const users: User[] = [];
     for (const id of userIds) {
-      const { data: { user } } = await supabase.auth.admin.getUserById(id);
+      const {
+        data: { user },
+      } = await supabase.auth.admin.getUserById(id);
       if (user) {
         users.push(user);
       }

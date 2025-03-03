@@ -1,12 +1,12 @@
 'use client';
 
 import { useAnalytics } from '@repo/analytics/posthog/client';
-import { useUser } from '@repo/supabase/hooks/use-user';
+import { useSession } from '@repo/supabase/hooks/use-session';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 export const PostHogIdentifier = () => {
-  const { data: user } = useUser();
+  const { session } = useSession();
   const identified = useRef(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -26,17 +26,17 @@ export const PostHogIdentifier = () => {
   }, [pathname, searchParams, analytics]);
 
   useEffect(() => {
-    if (!user || identified.current) {
+    if (!session?.user || identified.current) {
       return;
     }
 
-    analytics.identify(user.id, {
-      email: user.email,
-      created_at: user.created_at,
+    analytics.identify(session.user.id, {
+      email: session.user.email,
+      created_at: session.user.created_at,
     });
 
     identified.current = true;
-  }, [user, analytics]);
+  }, [session, analytics]);
 
   return null;
 };

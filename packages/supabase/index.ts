@@ -13,6 +13,9 @@ export * from './components/sign-in';
 export * from './components/sign-up';
 export * from './components/sign-out';
 
+// Hooks
+export * from './hooks/use-session';
+
 // Types
 export * from './database.types';
 
