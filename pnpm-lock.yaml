@@ -66,9 +66,9 @@ importers:
       '@repo/payments':
         specifier: workspace:*
         version: link:../../packages/payments
-      '@repo/supabase':
+      '@repo/supabase-auth':
         specifier: workspace:*
-        version: link:../../packages/supabase
+        version: link:../../packages/supabase-auth
       '@repo/testing':
         specifier: workspace:*
         version: link:../../packages/testing
@@ -151,9 +151,9 @@ importers:
       '@repo/seo':
         specifier: workspace:*
         version: link:../../packages/seo
-      '@repo/supabase':
+      '@repo/supabase-auth':
         specifier: workspace:*
-        version: link:../../packages/supabase
+        version: link:../../packages/supabase-auth
       '@repo/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -379,9 +379,9 @@ importers:
       '@repo/seo':
         specifier: workspace:*
         version: link:../../packages/seo
-      '@repo/supabase':
+      '@repo/supabase-auth':
         specifier: workspace:*
-        version: link:../../packages/supabase
+        version: link:../../packages/supabase-auth
       '@repo/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
@@ -727,9 +727,9 @@ importers:
       '@repo/observability':
         specifier: workspace:*
         version: link:../observability
-      '@repo/supabase':
+      '@repo/supabase-auth':
         specifier: workspace:*
-        version: link:../supabase
+        version: link:../supabase-auth
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -858,9 +858,9 @@ importers:
       '@repo/design-system':
         specifier: workspace:*
         version: link:../design-system
-      '@repo/supabase':
+      '@repo/supabase-auth':
         specifier: workspace:*
-        version: link:../supabase
+        version: link:../supabase-auth
       '@t3-oss/env-nextjs':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.2)(zod@3.24.2)
@@ -1147,6 +1147,12 @@ importers:
 
   packages/supabase-auth:
     dependencies:
+      '@radix-ui/react-icons':
+        specifier: ^1.3.2
+        version: 1.3.2(react@19.0.0)
+      '@repo/design-system':
+        specifier: workspace:*
+        version: link:../design-system
       '@repo/tailwind-config':
         specifier: workspace:*
         version: link:../tailwind-config
@@ -1226,9 +1232,9 @@ importers:
 
   packages/webhooks:
     dependencies:
-      '@repo/supabase':
+      '@repo/supabase-auth':
         specifier: workspace:*
-        version: link:../supabase
+        version: link:../supabase-auth
       '@t3-oss/env-nextjs':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.2)(zod@3.24.2)

@@ -201,10 +201,6 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
   const userEmail = session?.user?.email || '';
   const router = useRouter();
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
   return (
     <>
       <Sidebar variant="inset">

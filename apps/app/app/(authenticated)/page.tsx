@@ -1,17 +1,18 @@
 import { database } from '@repo/database';
+import { parseError } from '@repo/observability/error';
+import { log } from '@repo/observability/log';
 import { getServerClient } from '@repo/supabase-auth/clients/server';
 import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
 import { Header } from './components/header';
 
 const title = 'Acme Inc';
 const description = 'My application.';
 
-const CollaborationProvider = dynamic(() =>
-  import('./components/collaboration-provider').then(
-    (mod) => mod.CollaborationProvider
-  )
-);
+// const CollaborationProvider = dynamic(() =>
+//   import('./components/collaboration-provider').then(
+//     (mod) => mod.CollaborationProvider
+//   )
+// );
 
 export const metadata: Metadata = {
   title,
@@ -19,46 +20,49 @@ export const metadata: Metadata = {
 };
 
 const App = async () => {
-  console.log('Authenticated page rendering');
+  const supabase = getServerClient();
 
-  const pages = await database.page.findMany();
-  const supabase = await getServerClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const orgId = session?.user?.id; // Using user ID as org ID for now
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  console.log('Authenticated page session status:', !!session);
+    if (!user) {
+      log.warn('No authenticated user found');
+      // You might want to redirect to login or handle this case differently
+    }
 
-  if (!session) {
-    console.log('Authenticated page - no session found');
-    return null;
-  }
+    try {
+      const pages = await database.page.findMany();
 
-  console.log('Authenticated page rendering content');
-
-  return (
-    <>
-      <Header pages={['Building Your Application']} page="Data Fetching">
-        {/* {env.LIVEBLOCKS_SECRET && (
-          <CollaborationProvider orgId={orgId}>
-            <AvatarStack />
-            <Cursors />
-          </CollaborationProvider>
-        )} */}
-      </Header>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          {pages.map((page) => (
-            <div key={page.id} className="aspect-video rounded-xl bg-muted/50">
-              {page.name}
+      return (
+        <>
+          <Header pages={['Building Your Application']} page="Data Fetching" />
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+              {pages.map((page) => (
+                <div
+                  key={page.id}
+                  className="aspect-video rounded-xl bg-muted/50"
+                >
+                  {page.name}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-      </div>
-    </>
-  );
+            <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+          </div>
+        </>
+      );
+    } catch (dbError) {
+      log.error('Database error occurred', { error: parseError(dbError) });
+      throw new Error('Failed to fetch pages from database');
+    }
+  } catch (authError) {
+    log.error('Authentication error occurred', {
+      error: parseError(authError),
+    });
+    throw new Error('Authentication failed');
+  }
 };
 
 export default App;

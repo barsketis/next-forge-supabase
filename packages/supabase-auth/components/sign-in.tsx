@@ -1,9 +1,30 @@
 'use client';
 
+import {
+  Alert,
+  AlertDescription,
+} from '@repo/design-system/components/ui/alert';
+import { Button } from '@repo/design-system/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@repo/design-system/components/ui/card';
+import {
+  EnvelopeClosedIcon,
+  ExclamationTriangleIcon,
+  LockClosedIcon,
+} from '@repo/design-system/components/ui/icons';
+import { Input } from '@repo/design-system/components/ui/input';
+import { Label } from '@repo/design-system/components/ui/label';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getBrowserClient } from '../clients/browser';
-import { emailPasswordSchema } from '../utils/schemas';
+import { emailPasswordSchema, emailSchema } from '../utils/schemas';
 import { useAuth } from './AuthProvider';
 
 type SignInProps = {
@@ -26,6 +47,7 @@ export function SignIn({
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isResetEmailSent, setIsResetEmailSent] = useState(false);
   const supabase = getBrowserClient();
   const { error: authError } = useAuth();
 
@@ -100,66 +122,129 @@ export function SignIn({
     }
   }
 
+  async function handlePasswordReset() {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Validate email
+      emailSchema.parse({ email });
+
+      // Send password reset email
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) throw error;
+
+      setIsResetEmailSent(true);
+      setIsLoading(false);
+    } catch (error) {
+      handleError(error);
+      setIsLoading(false);
+    }
+  }
+
   return (
-    <div className="w-full max-w-md space-y-8">
-      <div className="text-center">
-        <h2 className="font-bold text-3xl">Sign In</h2>
-        <p className="mt-2 text-gray-600 text-sm">
-          Enter your credentials to access your account
-        </p>
-      </div>
+    <div className="mx-auto flex w-full max-w-md items-center justify-center">
+      <Card className="w-full shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-center font-bold text-2xl">
+            Welcome back
+          </CardTitle>
+          <CardDescription className="text-center">
+            Enter your credentials to access your account
+          </CardDescription>
+        </CardHeader>
 
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="text-red-700 text-sm">{error}</div>
-          </div>
-        )}
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="text-sm">
+                <ExclamationTriangleIcon className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block font-medium text-sm">
-              Email address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-            />
-          </div>
+            {isResetEmailSent && (
+              <Alert className="border-green-200 bg-green-50 text-green-800 text-sm">
+                <AlertDescription>
+                  Password reset email sent. Please check your inbox.
+                </AlertDescription>
+              </Alert>
+            )}
 
-          <div>
-            <label htmlFor="password" className="block font-medium text-sm">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-            />
-          </div>
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="font-medium text-sm">
+                Email
+              </Label>
+              <div className="relative">
+                <EnvelopeClosedIcon className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
-        <div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600 focus-visible:outline-offset-2"
-          >
-            {isLoading ? 'Signing in...' : 'Sign in'}
-          </button>
-        </div>
-      </form>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="font-medium text-sm">
+                  Password
+                </Label>
+                <button
+                  type="button"
+                  className="text-primary text-xs hover:underline"
+                  onClick={handlePasswordReset}
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <div className="relative">
+                <LockClosedIcon className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex flex-col gap-4">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+              variant="default"
+              size="lg"
+            >
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </Button>
+
+            <p className="text-center text-muted-foreground text-sm">
+              Don't have an account?{' '}
+              <Link
+                href="/auth/sign-up"
+                className="text-primary hover:underline"
+              >
+                Create an account
+              </Link>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
     </div>
   );
 }
