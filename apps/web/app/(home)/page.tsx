@@ -5,7 +5,7 @@ import { Cases } from './components/cases';
 import { CTA } from './components/cta';
 import { FAQ } from './components/faq';
 import { Features } from './components/features';
-import { Hero } from './components/hero';
+// import { Hero } from './components/hero';
 import { Stats } from './components/stats';
 import { Testimonials } from './components/testimonials';
 
@@ -22,12 +22,13 @@ const Home = async () => {
 
   return (
     <>
-      {betaFeature && (
+      <div>test</div>
+      {/* {betaFeature && (
         <div className="w-full bg-black py-2 text-center text-white">
           Beta feature now available
         </div>
-      )}
-      <Hero />
+      )} */}
+      {/* <Hero /> */}
       <Cases />
       <Features />
       <Stats />
