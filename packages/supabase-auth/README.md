@@ -51,12 +51,12 @@ In an SSR context, these tokens are managed through cookies to ensure they're ac
         ▲ │                     ▲ │                     ▲
         │ │                     │ │                     │
         │ ▼                     │ ▼                     │
-┌─────────────────┐     ┌─────────────────┐            │
-│  Client-side    │     │  Server-side    │            │
-│  Components     │     │  Components     │            │
-└─────────────────┘     └─────────────────┘            │
-        │                       │                      │
-        └───────────────────────┴──────────────────────┘
+┌─────────────────┐     ┌─────────────────┐             │
+│  Client-side    │     │  Server-side    │             │
+│  Components     │     │  Components     │             │
+└─────────────────┘     └─────────────────┘             │
+        │                       │                       │
+        └───────────────────────┴───────────────────────┘
 ```
 
 ### SSR Session Management
