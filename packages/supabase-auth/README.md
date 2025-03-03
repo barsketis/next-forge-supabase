@@ -266,6 +266,7 @@ export default async function ProtectedLayout({ children }) {
 ```tsx
 // app/(authenticated)/dashboard/page.tsx
 import { getServerClient } from '@repo/supabase-auth/clients/server';
+import { database } from '@repo/database';
 
 export default async function DashboardPage() {
   const supabase = await getServerClient();
@@ -278,12 +279,23 @@ export default async function DashboardPage() {
   }
   
   // Fetch user-specific data
-  const { data: projects } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const projects = await database.project.findMany({
+    where: {
+      userId: user.id
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  });
+
+  // or alternatively
+    // const { data: projects } = await supabase
+    // .from('projects')
+    // .select('*')
+    // .eq('user_id', user.id)
+    // .order('created_at', { ascending: false });
     
+  
   return (
     <div>
       <h1>Your Projects</h1>
@@ -328,6 +340,7 @@ export async function updateUserProfile(formData: FormData) {
   const { error } = await supabase.auth.updateUser({
     data: { name, bio }
   });
+  // this might need to be admin function, not sure if auth.user is public, best to ahve a mirrored user table that is triggered with each auth.user create to have custom information
   
   if (error) {
     return { error: error.message };
