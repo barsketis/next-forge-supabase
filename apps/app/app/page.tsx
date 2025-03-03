@@ -17,12 +17,10 @@ export default async function RootPage() {
     redirect('/sign-in');
   }
 
-  console.log('Root page authenticated, rendering content');
+  // If authenticated, redirect to dashboard
+  console.log('Root page authenticated, redirecting to dashboard');
+  redirect('/dashboard');
 
-  // If authenticated, render the dashboard content directly
-  return (
-    <main>
-      <h1>Redirecting to dashboard...</h1>
-    </main>
-  );
+  // This code won't execute due to the redirect above
+  return null;
 }
