@@ -168,7 +168,7 @@ export async function requestPasswordReset(params: RequestPasswordResetParams) {
 }
 
 // MFA Management
-export async function fetchMfaFactors(userId: string) {
+export async function fetchMfaFactors() {
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase.auth.mfa.listFactors();
 
