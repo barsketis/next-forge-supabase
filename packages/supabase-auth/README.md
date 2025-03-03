@@ -30,6 +30,60 @@ A modern Supabase authentication package for Next.js applications, with support 
 - ⏳ Password strength requirements
 - ⏳ User profile management
 
+## How It Works
+
+This library provides a seamless integration between Next.js and Supabase Auth, with special focus on Server-Side Rendering (SSR) functionality. Understanding how the authentication flow works is key to effectively implementing it in your application.
+
+### Authentication Flow Architecture
+
+Supabase Auth uses JWT-based authentication with two key tokens:
+1. **Access Token**: A short-lived JWT containing user claims
+2. **Refresh Token**: A longer-lived token used to obtain new access tokens
+
+In an SSR context, these tokens are managed through cookies to ensure they're accessible by both server and client code. Here's how the authentication flow works:
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │
+│     Browser     │◄────┤  Next.js Server │◄────┤  Supabase Auth  │
+│                 │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        ▲ │                     ▲ │                     ▲
+        │ │                     │ │                     │
+        │ ▼                     │ ▼                     │
+┌─────────────────┐     ┌─────────────────┐            │
+│  Client-side    │     │  Server-side    │            │
+│  Components     │     │  Components     │            │
+└─────────────────┘     └─────────────────┘            │
+        │                       │                      │
+        └───────────────────────┴──────────────────────┘
+```
+
+### SSR Session Management
+
+When a user visits your application:
+
+1. **Initial Request**: 
+   - Cookies containing auth tokens are sent to the server
+   - The Next.js **middleware** (critical component) intercepts the request
+   - Middleware uses `updateSession()` to check token validity
+
+2. **Token Refreshing**:
+   - If the access token is expired, the middleware automatically uses the refresh token to obtain a new one
+   - New tokens are set as cookies in the response headers
+   - Without the middleware, token refreshing won't work properly in SSR contexts
+
+3. **Server Component Rendering**:
+   - Server components can read auth state using `getServerClient()`
+   - Server components can't set cookies, which is why middleware is essential
+
+4. **Client-side Hydration**:
+   - After server rendering, client components take over
+   - Client components use `getBrowserClient()` to manage auth state
+   - The client handles proactive token refreshing during user interactions
+
+This separation of concerns ensures your authentication works seamlessly across server and client environments.
+
 ## Installation
 
 ```bash
@@ -301,6 +355,8 @@ export async function deleteUser(userId: string) {
 
 ### 5. Middleware
 
+The middleware implementation is **critical** for proper SSR functionality. Without it, token refreshing won't work correctly in server components.
+
 ```tsx
 // middleware.ts
 import { updateSession } from '@repo/supabase-auth';
@@ -321,7 +377,8 @@ export async function middleware(request: NextRequest) {
   }
   
   try {
-    // This updates the auth session cookie
+    // This updates the auth session cookie - THE MOST CRITICAL PART OF SSR AUTH
+    // It checks if the access token is expired and refreshes it if needed
     await updateSession(request);
     
     // For protected routes, check if user is authenticated
@@ -418,6 +475,59 @@ export default function ForgotPasswordPage() {
   );
 }
 ```
+
+## Technical Details
+
+### Token Management
+
+This library handles authentication tokens in the following ways:
+
+1. **Token Storage**: 
+   - Access tokens and refresh tokens are stored in cookies
+   - Cookies are chunked if they exceed size limits (approximately 3180 bytes)
+   - Tokens are encoded to comply with cookie format requirements
+
+2. **Token Refresh**:
+   - Access tokens are refreshed automatically in the middleware
+   - Client-side code proactively refreshes tokens before they expire
+   - If a refresh token is invalid, the user is signed out
+
+3. **Cookie Management**:
+   - The library handles all cookie creation, updating, and removal
+   - Security settings like HttpOnly, SameSite, and Secure are properly configured
+   - Both chunked and non-chunked cookies are correctly managed
+
+### Client/Server Separation
+
+The library maintains a clear separation between client and server code:
+
+- **Server-side**: Uses `getServerClient()` which reads cookies from request headers
+- **Client-side**: Uses `getBrowserClient()` which reads/writes to browser cookies
+- **Middleware**: Uses cookie APIs to handle token refreshing
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Authentication not working in server components**:
+   - Make sure you've implemented the middleware correctly
+   - Verify the middleware is actually running (add console logs)
+   - Check that your routes are properly matched in the middleware config
+
+2. **Session not persisting between pages**:
+   - Ensure cookies are being set correctly in responses
+   - Check for cookie size issues causing truncation
+   - Verify domain/path configurations match your application structure
+
+3. **"Refresh token not found" errors**:
+   - This usually means the user is not signed in or the session has expired
+   - Check that cookies are not being blocked by browser settings
+   - Ensure your cookies are configured for the correct domain/path
+
+4. **Sign-in works but data fetching fails**:
+   - Ensure you're using the correct Supabase client in each context
+   - Verify RLS policies on your Supabase tables
+   - Check that your JWT claims match your policy requirements
 
 ## API Reference
 
