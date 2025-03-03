@@ -1,5 +1,6 @@
 'use client';
 
+import { parseError } from '@repo/observability/error';
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
@@ -63,7 +64,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(user);
         }
       } catch (err) {
-        console.error('Error initializing auth:', err);
+        parseError(err);
         setError(
           err instanceof Error ? err : new Error('Unknown authentication error')
         );

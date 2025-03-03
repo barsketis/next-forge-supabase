@@ -13,7 +13,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@repo/design-system/components/ui/tabs';
-import { getSupabaseAppServerClient } from '@repo/supabase/app-router';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
 import type { Metadata } from 'next';
 import { Header } from '../components/header';
 import SignOutButton from '../components/sign-out-button';
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
-  const supabase = await getSupabaseAppServerClient();
+  const supabase = await getServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

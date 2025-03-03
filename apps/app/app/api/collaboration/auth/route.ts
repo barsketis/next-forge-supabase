@@ -1,5 +1,5 @@
 import { authenticate } from '@repo/collaboration/auth';
-import { getSupabaseServerClient } from '@repo/supabase/server';
+import { getServerClient } from '@repo/supabase-auth/clients';
 import { tailwind } from '@repo/tailwind-config';
 
 const COLORS = [
@@ -23,7 +23,7 @@ const COLORS = [
 ];
 
 export const POST = async () => {
-  const supabase = getSupabaseServerClient();
+  const supabase = getServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

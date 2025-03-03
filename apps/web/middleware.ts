@@ -6,29 +6,32 @@ import {
   noseconeOptions,
   noseconeOptionsWithToolbar,
 } from '@repo/security/middleware';
-import { createMiddlewareClient } from '@repo/supabase/clients/middleware-client';
+import { updateSession } from '@repo/supabase-auth';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export const config = {
   // matcher tells Next.js which routes to run the middleware on. This runs the
   // middleware on all routes except for static assets and Posthog ingest
-  matcher: ['/((?!_next/static|_next/image|ingest|favicon.ico).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|ingest|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };
 
 const securityHeaders = env.FLAGS_SECRET
   ? noseconeMiddleware(noseconeOptionsWithToolbar)
   : noseconeMiddleware(noseconeOptions);
 
-export default async function middleware(req: NextRequest) {
+export default async function middleware(request: NextRequest) {
   try {
-    const res = NextResponse.next();
-    // Cast both request and response to any to bypass the type mismatches
-    // This is safe because the underlying implementations are compatible
-    const supabase = createMiddlewareClient(req as any, res as any);
-
-    // Refresh session if expired - required for Server Components
-    await supabase.auth.getSession();
+    // Call updateSession to maintain auth state, but don't use its response
+    // This avoids type issues between different Next.js versions
+    try {
+      await updateSession(request as any);
+    } catch (error) {
+      // Log error using the observability package
+      parseError(error);
+    }
 
     if (!env.ARCJET_KEY) {
       return securityHeaders();
@@ -42,7 +45,7 @@ export default async function middleware(req: NextRequest) {
           'CATEGORY:PREVIEW', // Allow preview links to show OG images
           'CATEGORY:MONITOR', // Allow uptime monitoring services
         ],
-        req
+        request
       );
 
       return securityHeaders();

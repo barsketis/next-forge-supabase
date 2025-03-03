@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import type { CookieOptions } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import type { NextRequest, NextResponse } from 'next/server';
 import { keys } from '../keys';
 
 /**
@@ -53,6 +54,37 @@ export function getAdminClient(): SupabaseClient {
         get: async () => undefined,
         set: async () => {},
         remove: async () => {},
+      },
+    }
+  );
+}
+
+/**
+ * Create a Supabase client specifically for use in middleware
+ * @param req The Next.js request object
+ * @param res The Next.js response object
+ * @returns Supabase client configured for middleware
+ */
+export function createServerClientForMiddleware(
+  req: NextRequest,
+  res: NextResponse
+): SupabaseClient {
+  const env = keys();
+
+  return createServerClient(
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get: (name: string) => {
+          return req.cookies.get(name)?.value;
+        },
+        set: (name: string, value: string, options: CookieOptions) => {
+          res.cookies.set({ name, value, ...options });
+        },
+        remove: (name: string, options: CookieOptions) => {
+          res.cookies.set({ name, value: '', ...options });
+        },
       },
     }
   );

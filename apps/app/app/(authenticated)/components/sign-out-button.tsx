@@ -1,6 +1,7 @@
 'use client';
 
-import { getSupabaseBrowserClient } from '@repo/supabase/clients/browser-client';
+import { parseError } from '@repo/observability/error';
+import { getBrowserClient } from '@repo/supabase-auth/clients/browser';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -11,7 +12,7 @@ export default function SignOutButton() {
   const handleSignOut = async () => {
     try {
       setIsLoading(true);
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getBrowserClient();
 
       // Sign out the user
       await supabase.auth.signOut();
@@ -19,7 +20,7 @@ export default function SignOutButton() {
       // Refresh the page to trigger a redirect to the sign-in page
       router.refresh();
     } catch (error) {
-      console.error('Error signing out:', error);
+      parseError(error);
     } finally {
       setIsLoading(false);
     }

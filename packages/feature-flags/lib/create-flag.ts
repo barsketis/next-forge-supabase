@@ -1,5 +1,5 @@
 import { analytics } from '@repo/analytics/posthog/server';
-import { getSupabaseServerClient } from '@repo/supabase/server';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
 import { flag } from '@vercel/flags/next';
 
 export const createFlag = (key: string) =>
@@ -7,7 +7,7 @@ export const createFlag = (key: string) =>
     key,
     defaultValue: false,
     async decide() {
-      const supabase = getSupabaseServerClient();
+      const supabase = getServerClient();
       const {
         data: { session },
       } = await supabase.auth.getSession();

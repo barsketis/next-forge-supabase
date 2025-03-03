@@ -1,7 +1,6 @@
 'use server';
 
-import { getSupabaseServerClient } from '@repo/supabase/server';
-import type { User } from '@supabase/supabase-js';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
 import Fuse from 'fuse.js';
 
 export const searchUsers = async (
@@ -15,7 +14,7 @@ export const searchUsers = async (
     }
 > => {
   try {
-    const supabase = getSupabaseServerClient();
+    const supabase = getServerClient();
     const { data: session } = await supabase.auth.getSession();
 
     if (!session.session?.user) {
@@ -23,8 +22,11 @@ export const searchUsers = async (
     }
 
     // Get all users in the organization
-    const { data: { users }, error } = await supabase.auth.admin.listUsers();
-    
+    const {
+      data: { users },
+      error,
+    } = await supabase.auth.admin.listUsers();
+
     if (error) {
       throw error;
     }

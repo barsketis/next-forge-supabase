@@ -1,5 +1,5 @@
 import { database } from '@repo/database';
-import { getSupabaseServerClient } from '@repo/supabase/server';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
 import { notFound, redirect } from 'next/navigation';
 import { Header } from '../components/header';
 
@@ -29,7 +29,7 @@ const SearchPage = async ({ searchParams }: SearchPageProperties) => {
       },
     },
   });
-  const supabase = getSupabaseServerClient();
+  const supabase = getServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

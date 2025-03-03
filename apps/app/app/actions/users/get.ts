@@ -1,6 +1,6 @@
 'use server';
 
-import { getSupabaseServerAdminClient } from '@repo/supabase/clients/server-admin-client';
+import { getAdminClient } from '@repo/supabase-auth/clients/server';
 import { tailwind } from '@repo/tailwind-config';
 import type { User } from '@supabase/supabase-js';
 
@@ -35,7 +35,7 @@ export const getUsers = async (
     }
 > => {
   try {
-    const supabase = getSupabaseServerAdminClient();
+    const supabase = getAdminClient();
     const { data: session } = await supabase.auth.getSession();
 
     if (!session.session?.user) {

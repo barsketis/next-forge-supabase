@@ -35,8 +35,8 @@ import {
 } from '@repo/design-system/components/ui/sidebar';
 import { cn } from '@repo/design-system/lib/utils';
 import { NotificationsTrigger } from '@repo/notifications/components/trigger';
-import { signOut } from '@repo/supabase';
-import { useSession } from '@repo/supabase/app-router/hooks/use-session';
+import { signOut } from '@repo/supabase-auth/actions/auth';
+import { useSession } from '@repo/supabase-auth/hooks/use-session';
 import {
   AnchorIcon,
   BookOpenIcon,
@@ -238,7 +238,7 @@ export const GlobalSidebar = ({ children }: GlobalSidebarProperties) => {
                     <DropdownMenuSeparator />
                     <form
                       action={async () => {
-                        await signOut({ redirectTo: '/sign-in' });
+                        await signOut('/sign-in');
                       }}
                     >
                       <DropdownMenuItem asChild>

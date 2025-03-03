@@ -1,5 +1,5 @@
 import { database } from '@repo/database';
-import { getSupabaseAppServerClient } from '@repo/supabase/app-router';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import { Header } from './components/header';
@@ -22,7 +22,7 @@ const App = async () => {
   console.log('Authenticated page rendering');
 
   const pages = await database.page.findMany();
-  const supabase = await getSupabaseAppServerClient();
+  const supabase = await getServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

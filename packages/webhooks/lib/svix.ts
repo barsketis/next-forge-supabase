@@ -1,5 +1,5 @@
 import 'server-only';
-import { getSupabaseServerClient } from '@repo/supabase/server';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
 import { Svix } from 'svix';
 import { keys } from '../keys';
 
@@ -11,7 +11,7 @@ export const send = async (eventType: string, payload: object) => {
   }
 
   const svix = new Svix(svixToken);
-  const supabase = getSupabaseServerClient();
+  const supabase = getServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -40,7 +40,7 @@ export const getAppPortal = async () => {
   }
 
   const svix = new Svix(svixToken);
-  const supabase = getSupabaseServerClient();
+  const supabase = getServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

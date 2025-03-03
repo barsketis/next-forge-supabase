@@ -125,9 +125,9 @@ Supabase Auth provides a default user schema with the following key fields:
 Example of accessing user data in server components:
 
 ```ts
-import { getSupabaseServerClient } from '@repo/supabase/server';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
 
-const supabase = getSupabaseServerClient();
+const supabase = getServerClient();
 const { data: { session } } = await supabase.auth.getSession();
 const user = session?.user;
 ```

@@ -3,7 +3,7 @@ import { SidebarProvider } from '@repo/design-system/components/ui/sidebar';
 import { showBetaFeature } from '@repo/feature-flags';
 import { NotificationsProvider } from '@repo/notifications/components/provider';
 import { secure } from '@repo/security';
-import { getSupabaseAppServerClient } from '@repo/supabase/app-router';
+import { getServerClient } from '@repo/supabase-auth/clients/server';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { PostHogIdentifier } from './components/posthog-identifier';
@@ -20,7 +20,7 @@ const AppLayout = async ({ children }: AppLayoutProperties) => {
     await secure(['CATEGORY:PREVIEW']);
   }
 
-  const supabase = await getSupabaseAppServerClient();
+  const supabase = await getServerClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
