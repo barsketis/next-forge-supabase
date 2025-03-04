@@ -341,6 +341,12 @@ export async function updateUserProfile(formData: FormData) {
     data: { name, bio }
   });
   // this might need to be admin function, not sure if auth.user is public, best to ahve a mirrored user table that is triggered with each auth.user create to have custom information
+
+  //https://supabase.com/docs/guides/auth/managing-user-data
+  // Accessing user data via API#
+// For security, the Auth schema is not exposed in the auto-generated API. If you want to access users data via the API, you can create your own user tables in the public schema.
+
+// Make sure to protect the table by enabling Row Level Security. Reference the auth.users table to ensure data integrity. Specify on delete cascade in the reference. For example, a public.profiles table might look like this:
   
   if (error) {
     return { error: error.message };

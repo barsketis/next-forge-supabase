@@ -47,13 +47,7 @@ export interface User {
   - `/apps/app/app/(unauthenticated)/sign-up/[[...sign-up]]/page.tsx`: Update SignUp component import
   - `/apps/app/app/(authenticated)/search/page.tsx`: Update auth import
   - `/apps/app/app/(unauthenticated)/sign-in/[[...sign-in]]/page.tsx`: Update SignIn component import
-- [ ] Update documentation files:
-  - `/docs/packages/ai.mdx`
-  - `/docs/packages/authentication.mdx`
-  - `/docs/packages/security/rate-limiting.mdx`
-  - `/docs/recipes/ai-chatbot.mdx`
-  - `/docs/migrations/storage/upload-thing.mdx`
-  - `/docs/migrations/flags/hypertune.mdx`
+
 
 ### 2. Update Environment Variables
 - [x] Remove Clerk variables from all `.env.example` files:
